@@ -2,11 +2,14 @@ import { Typography } from 'antd';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import AppHeader from './AppHeader';
+import AppFooter from './AppFooter';
+import { BrowserRouter } from 'react-router-dom'
+import AppRoutes from './Routes';
 
 function App() {
     return (
         <div className='App'>
-            <AppHeader />
+            <AppRoutes/>
         </div>
     );
 }
@@ -18,7 +21,9 @@ if (document.getElementById('app')) {
 
     Index.render(
         <React.StrictMode>
-            <App />
+            <BrowserRouter>
+                <App />
+            </BrowserRouter>
         </React.StrictMode>
     )
 }

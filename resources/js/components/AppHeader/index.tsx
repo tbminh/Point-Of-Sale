@@ -6,21 +6,24 @@ import './styles.scss'
 const AppHeader = () => {
     const [openMenu, setOpenMenu] = useState(false)
     return (
-        <div className='appHeader'>
-            <div  style={{ display: 'flex', alignItems: 'center' }}>
-                <MenuOutlined className='menuIcon' style={{ marginLeft: '16px', fontSize: '20px' }} onClick={() => setOpenMenu(true)} />
+        <div className='appHeader' >
+            <div style={{ marginLeft: '16px', fontSize: '20px' }} className='menuIcon'>
+                <MenuOutlined
+                    onClick={() => setOpenMenu(true)}
+                />
+            </div>
+            <div className="headerMenu">
                 <AppMenu />
             </div>
             <Drawer
                 placement='left'
                 open={openMenu}
-                closable={false}
                 onClose={() => {
                     setOpenMenu(false)
                 }}>
                 <AppMenu isInline />
             </Drawer>
-            <Typography.Title>AG STORE</Typography.Title>
+            <Typography.Title className="shopName">AG STORE</Typography.Title>
             <AppCart />
         </div>
 
@@ -29,9 +32,9 @@ const AppHeader = () => {
 
 function AppMenu({ isInline = false }) {
     return (
-        <>
+        <div>
             <Menu
-                className='appMenu'
+                style={{ color: 'black' }}
                 // onClick={onMenuClick}
                 mode={isInline ? 'inline' : 'horizontal'}
                 items={[
@@ -84,8 +87,8 @@ function AppMenu({ isInline = false }) {
                         key: "fragrances",
                     },
                 ]}
-            />
-        </>
+            ></Menu>
+        </div>
     )
 }
 

@@ -12,3 +12,19 @@
     cursor: pointer;
 }
 
+.shopName{
+    margin-bottom: 0 !important;
+}
+
+@media (max-width:600px) {
+    .headerMenu{
+        display: none;
+    }
+}
+
+@media (min-width:600px) {
+    .menuIcon{
+        display: none;
+    }
+    
+}
