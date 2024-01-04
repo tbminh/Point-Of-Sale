@@ -2,7 +2,7 @@ import { Button, FloatButton, Modal, Space, Table, Typography } from "antd"
 import React, { useState } from "react"
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
-const Dashboard = () => {
+const Products = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
         setIsModalOpen(true);
@@ -19,24 +19,10 @@ const Dashboard = () => {
 
     const dataSource = Array.from({ length: 10 }, (_, index) => ({
         id: index + 1,
-        tableName: `Bàn ${index + 1}`,
-        tableStatus: "OK",
+        productName: `Món ${index + 1}`,
+        price: 40000,
     }));
-    //  [
-    //     {
-    //         id: '1',
-    //         tableName: 'Bàn 1',
-    //         age: 32,
-    //         address: '10 Downing Street',
-    //     },
-    //     {
-    //         id: '2',
-    //         name: 'John',
-    //         age: 42,
-    //         address: '10 Downing Street',
-    //     },
-        
-    // ];
+
 
     const columns = [
         {
@@ -46,16 +32,23 @@ const Dashboard = () => {
             width: 50,
         },
         {
-            title: 'Tên bàn',
-            dataIndex: 'tableName',
-            key: 'tableName',
+            title: 'Tên món',
+            dataIndex: 'productName',
+            key: 'productName',
             width: 100,
         },
         {
-            title: 'Trạng thái',
-            dataIndex: 'tableStatus',
-            key: 'tableStatus',
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
             width: 100,
+            render: (value) => {
+                const formattedPrice = Number(value).toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                });
+                return formattedPrice;
+            },
         },
         {
             title: '',
@@ -82,7 +75,7 @@ const Dashboard = () => {
 
     return (
         <div style={{ marginTop: '10px' }}>
-            <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Bàn</Typography.Title>
+            <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Món Ăn</Typography.Title>
             <FloatButton
                 shape="circle"
                 type="primary"
@@ -106,5 +99,5 @@ const Dashboard = () => {
     )
 }
 
-export default Dashboard
+export default Products
 

@@ -12,19 +12,19 @@ const SideMenuAdmin = () => {
                 }}
                 items={[
                     {
-                        label: "Dashboard",
+                        label: "Bàn",
                         icon: <AppstoreOutlined />,
                         key: '/admin/dashboard'
                     },
                     {
-                        label: "Inventory",
+                        label: "Món ăn",
                         icon: <ShopOutlined />,
-                        key: '/admin/inventory'
+                        key: '/admin/products'
                     },
                     {
-                        label: "Orders",
+                        label: "Người dùng",
                         icon: <ShoppingCartOutlined />,
-                        key: '/admin/orders'
+                        key: '/admin/users'
                     },
                     {
                         label: "Customers",

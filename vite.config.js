@@ -3,6 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import reactRefresh from 'react-refresh'
 export default defineConfig({
+    
     plugins: [
         laravel({
             input: [
@@ -12,5 +13,6 @@ export default defineConfig({
             refresh: true,
         }),
         reactRefresh,
+      
     ],
 });
