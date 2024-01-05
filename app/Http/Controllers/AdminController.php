@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Product;
+use App\Models\Table;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -10,12 +12,71 @@ use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
-    #region Product
-    public function get_product(){
-        $product = Product::all();
-        return response()->json(['list'=> $product]);
+    #region USer
+    public function get_user()
+    {
+        $product = User::orderBy('id', 'DESC')->get();
+        return response()->json(['list' => $product]);
     }
-    public function add_product(Request $request){
+    public function add_user(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_name' => 'required|string|unique:users,user_name',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+        $user = User::create([
+            'role' => $request->role,
+            'full_name' => $request->full_name,
+            'user_name' => $request->user_name,
+            'password' => Hash::make($request->password),
+            'phone' => Hash::make($request->password),
+        ]);
+        return response()->json(['message' => 'Thêm thành công'], 201);
+    }
+    public function update_user($id, Request $request)
+    {
+        User::where('id', $id)->update([
+            'product_name' => $request->product_name,
+            'product_price' => $request->product_price,
+        ]);
+        return response()->json(['message' => 'Success'], 200);
+    }
+    public function delete_user($id)
+    {
+        User::where('id', $id)->delete();
+        return response()->json(['message' => 'Success'], 200);
+    }
+    #endregion
+
+    #region Product
+    public function get_product(Request $request)
+    {
+        $perPage = 5; // Số lượng dòng mỗi trang    
+        $searchValue = $request->product_name;
+        $pageNumber = $request->page; 
+        $query = Product::query();
+
+        if ($searchValue) {
+            $query->where('product_name', 'like', '%' . $searchValue . '%');
+        }
+        $data = $query->paginate($perPage, ['*'], 'page', $pageNumber)->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'product_name' => $item->product_name,
+                'product_price' => $item->product_price,
+            ];
+        });
+        $totalItems = $query->paginate($perPage, ['*'], 'page', $pageNumber)->total();
+        $totalPages = ceil($totalItems / $perPage);
+
+        // Thêm thông tin về tổng số trang vào dữ liệu trả về
+        $data->put('total_pages', $totalPages);
+        return response()->json($data);
+    }
+    public function add_product(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'product_name' => 'required|string|unique:products,product_name',
         ]);
@@ -28,16 +89,51 @@ class AdminController extends Controller
         ]);
         return response()->json(['message' => 'Thêm thành công'], 201);
     }
-    public function update_product($id,Request $request){
-        Product::where('id',$id)->update([
+    public function update_product($id, Request $request)
+    {
+        Product::where('id', $id)->update([
             'product_name' => $request->product_name,
             'product_price' => $request->product_price,
         ]);
-        return response()->json(['message'=>'Success'],200);
+        return response()->json(['message' => 'Success'], 200);
     }
-    public function delete_product($id){
-        Product::where('id',$id)->delete();
-        return response()->json(['message'=>'Success'],200);
+    public function delete_product($id)
+    {
+        Product::where('id', $id)->delete();
+        return response()->json(['message' => 'Success'], 200);
+    }
+    #endregion
+    #region Table
+    public function get_table()
+    {
+        $table = Table::orderBy('id', 'DESC')->get();
+        return response()->json(['list' => $table]);
+    }
+    public function add_table(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'table_name' => 'required|string|unique:tables,table_name',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+        $table = Table::create([
+            'table_name' => $request->table_name,
+            'table_status' => 0,
+        ]);
+        return response()->json(['message' => 'Thêm thành công'], 201);
+    }
+    public function update_table($id, Request $request)
+    {
+        Table::where('id', $id)->update([
+            'table_name' => $request->table_name,
+        ]);
+        return response()->json(['message' => 'Success'], 200);
+    }
+    public function delete_table($id)
+    {
+        Table::where('id', $id)->delete();
+        return response()->json(['message' => 'Success'], 200);
     }
     #endregion
 }
