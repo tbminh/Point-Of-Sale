@@ -2,6 +2,8 @@ import { Button, FloatButton, Modal, Space, Table, Typography } from "antd"
 import React, { useState } from "react"
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
+import axios from "axios";
+import { connect_string } from "../../Api";
 const Dashboard = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const showModal = () => {
@@ -17,26 +19,21 @@ const Dashboard = () => {
     };
 
 
+    // const handleGetAllProducts = () => {
+    //     axios.get(connect_string).then(res => {
+    //         const arr = res.data.list.map((item, index) => ({
+    //             id: index + 1,
+    //             //     tableName: `Bàn ${index + 1}`,
+    //             //     tableStatus: "OK",
+    //         }))
+    //     })
+    // }
+
     const dataSource = Array.from({ length: 10 }, (_, index) => ({
         id: index + 1,
         tableName: `Bàn ${index + 1}`,
         tableStatus: "OK",
     }));
-    //  [
-    //     {
-    //         id: '1',
-    //         tableName: 'Bàn 1',
-    //         age: 32,
-    //         address: '10 Downing Street',
-    //     },
-    //     {
-    //         id: '2',
-    //         name: 'John',
-    //         age: 42,
-    //         address: '10 Downing Street',
-    //     },
-        
-    // ];
 
     const columns = [
         {
@@ -55,10 +52,10 @@ const Dashboard = () => {
             title: 'Trạng thái',
             dataIndex: 'tableStatus',
             key: 'tableStatus',
-            width: 100,
+            width: 50,
         },
         {
-            title: '',
+            title: 'Hành động',
             dataIndex: 'delete',
             key: 'delete',
             render: () => (
@@ -73,7 +70,7 @@ const Dashboard = () => {
                         icon={<EditOutlined />} />
                 </Space>
             ),
-            width: 150,
+            width: 50,
 
 
         },

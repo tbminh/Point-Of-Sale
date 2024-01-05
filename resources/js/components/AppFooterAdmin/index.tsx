@@ -21,7 +21,7 @@ const AppFooterAdmin = () => {
                 {
                     label: "",
                     icon: <ShopOutlined />,
-                    key: '/admin/inventory'
+                    key: '/admin/products'
                 },
                 {
                     label: "",

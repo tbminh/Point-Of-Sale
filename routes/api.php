@@ -23,10 +23,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register', [UserController::class, 'register']);
 
-Route::middleware('auth:sanctum')->group(function () {
+// Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-product',[AdminController::class,'get_product']);
     Route::post('/add-product',[AdminController::class,'add_product']);
     Route::post('/update-product/{id}',[AdminController::class,'update_product']);
     Route::post('/delete-product/{id}',[AdminController::class,'delete_product']);
     Route::post('/logout', [UserController::class, 'logout']);
-});
+// });
