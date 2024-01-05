@@ -6,9 +6,12 @@ import axios from "axios";
 import { connect_string } from "../../Api";
 
 const Products = () => {
+
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [dataSource, setDataSource] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [totalPage, setTotalPage] = useState(0)
+    const [curentPage, setCurentPage] = useState(1)
     const [form] = Form.useForm();
 
     const showModal = () => {
@@ -25,7 +28,7 @@ const Products = () => {
     };
 
     useEffect(() => {
-        handleGetAllProducts()
+        handleGetAllProducts(1)
     }, [])
 
     const handleDeleteProduct = (value, record) => {
@@ -33,21 +36,25 @@ const Products = () => {
         axios.post(url).then(res => {
             if (res.data.message) {
                 message.success('Xóa thành công');
-                handleGetAllProducts()
+                handleGetAllProducts(curentPage)
             }
         })
 
     }
 
-    const handleGetAllProducts = () => {
+    const handleGetAllProducts = (page) => {
         setIsLoading(true)
-        axios.get(connect_string + 'get-product').then(res => {
-            const arr = res.data.list.map((item, index) => ({
+        const data = {
+            page: page
+        }
+        axios.post(connect_string + 'get-product', data).then(res => {
+            const arr = Object.values(res.data).slice(0, -1).map((item: any, index) => ({
                 id: index + 1,
                 productName: item.product_name,
                 price: item.product_price,
                 key: item.id
-            }))
+            }));
+            setTotalPage(res.data.total_pages)
             setDataSource(arr)
             setIsLoading(false)
         })
@@ -62,7 +69,7 @@ const Products = () => {
         axios.post(url, data).then(res => {
             if (res.data.message) {
                 message.success('Thêm thành công')
-                handleGetAllProducts()
+                handleGetAllProducts(1)
                 form.resetFields()
             }
         }).catch(() => {
@@ -135,13 +142,24 @@ const Products = () => {
                 icon={<PlusOutlined
                     onClick={showModal} />}
             />
-            <ModalCreate form={form} handleCancel={handleCancel} handleCreateProduct={handleCreateProduct} handleOk={handleOk} isModalOpen={isModalOpen} />
-            <Pagination className="pagination" defaultCurrent={1} total={500} pageSize={5} style={{ float: 'right' }}  showSizeChanger={false}/>
+            <ModalCreate
+                form={form}
+                handleCancel={handleCancel}
+                handleCreateProduct={handleCreateProduct}
+                handleOk={handleOk}
+                isModalOpen={isModalOpen} />
+            <Pagination
+                className="pagination"
+                defaultCurrent={1}
+                total={totalPage}
+                pageSize={5}
+                style={{ float: 'right' }}
+                showSizeChanger={false}
+                onChange={(page) => {handleGetAllProducts(page), setCurentPage(page)}} />
             <Table
                 loading={isLoading}
-                style={{ width: '100vw', marginBottom:'10px' }}
+                style={{ width: '100vw', marginBottom: '10px' }}
                 pagination={false}
-                // bordered={true}
                 dataSource={dataSource}
                 columns={columns}
                 scroll={{ x: '600px', y: '60vh' }} />
