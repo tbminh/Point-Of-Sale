@@ -33,6 +33,7 @@ Route::post('/register', [UserController::class, 'register']);
 
     #region Product
     Route::post('/get-product',[AdminController::class,'get_product']);
+    Route::get('/get-product-detail/{id}',[AdminController::class,'get_product_detail']);
     Route::post('/add-product',[AdminController::class,'add_product']);
     Route::post('/update-product/{id}',[AdminController::class,'update_product']);
     Route::post('/delete-product/{id}',[AdminController::class,'delete_product']);

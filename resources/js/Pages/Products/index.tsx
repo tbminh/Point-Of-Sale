@@ -8,24 +8,51 @@ import { connect_string } from "../../Api";
 const Products = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isModalEditOpen, setIsModalEditOpen] = useState(false)
     const [dataSource, setDataSource] = useState([])
     const [isLoading, setIsLoading] = useState(false)
     const [totalPage, setTotalPage] = useState(0)
     const [curentPage, setCurentPage] = useState(1)
-    const [form] = Form.useForm();
+    const [data, setData] = useState({})
+    const [formCreate] = Form.useForm();
+    const [formEdit] = Form.useForm();
 
-    const showModal = () => {
-        setIsModalOpen(true);
+
+    const showModal = (modalName) => {
+        if (modalName === 'create') {
+            setIsModalOpen(true);
+        }
+        else {
+            setIsModalEditOpen(true)
+        }
     };
 
-    const handleOk = () => {
-        form.submit();
-
+    const handleOk = (modalName) => {
+        if (modalName === 'create') {
+            formCreate.submit();
+        }
+        else {
+            formEdit.submit();
+        }
     };
 
-    const handleCancel = () => {
-        setIsModalOpen(false);
+    const handleCancel = (modalName) => {
+        if (modalName === 'create') {
+            setIsModalOpen(false);
+        }
+        else {
+            setIsModalEditOpen(false)
+        }
     };
+
+    const handleShowModalEdit = (record) => {
+        showModal('edit');
+        const url = connect_string + 'get-product-detail/' + record.key
+        axios.get(url).then(res => {
+            setData(res.data[0]);
+        })
+
+    }
 
     useEffect(() => {
         handleGetAllProducts(1)
@@ -70,12 +97,29 @@ const Products = () => {
             if (res.data.message) {
                 message.success('Thêm thành công')
                 handleGetAllProducts(1)
-                form.resetFields()
+                formCreate.resetFields()
             }
         }).catch(() => {
             message.error('Thêm thất bại')
         })
     }
+
+    const handleEditProduct = (values) => {
+        const url = connect_string + "update-product/" + values.myKey
+        const data = {
+            product_name: values.myProducts,
+            product_price: values.myPrice
+        }
+        axios.post(url, data).then(res => {
+            if (res.data) {
+                handleGetAllProducts(curentPage)
+                message.success("Cập nhật thành công")
+            }
+        }).catch(() => {
+            message.error("Cập nhật thất bại")
+        })
+    }
+
 
     const columns = [
         {
@@ -123,7 +167,10 @@ const Products = () => {
 
                     <Button
                         type="primary"
-                        icon={<EditOutlined />} />
+                        icon={<EditOutlined />}
+                        onClick={() => {
+                            handleShowModalEdit(record)
+                        }} />
                 </Space>
             ),
 
@@ -140,14 +187,21 @@ const Products = () => {
                 type="primary"
                 style={{ right: 20, bottom: 60 }}
                 icon={<PlusOutlined
-                    onClick={showModal} />}
+                    onClick={() => showModal('create')} />}
             />
             <ModalCreate
-                form={form}
-                handleCancel={handleCancel}
-                handleCreateProduct={handleCreateProduct}
-                handleOk={handleOk}
+                form={formCreate}
+                handleCancel={() => handleCancel('create')}
+                handleCreateProduct={() => handleCreateProduct}
+                handleOk={() => handleOk('create')}
                 isModalOpen={isModalOpen} />
+            <ModalEdit
+                form={formEdit}
+                handleCancel={() => handleCancel('edit')}
+                handleCreateProduct={(value) => handleEditProduct(value)}
+                handleOk={() => handleOk('edit')}
+                isModalOpen={isModalEditOpen}
+                data={data} />
             <Pagination
                 className="pagination"
                 defaultCurrent={1}
@@ -155,7 +209,7 @@ const Products = () => {
                 pageSize={5}
                 style={{ float: 'right' }}
                 showSizeChanger={false}
-                onChange={(page) => {handleGetAllProducts(page), setCurentPage(page)}} />
+                onChange={(page) => { handleGetAllProducts(page), setCurentPage(page) }} />
             <Table
                 loading={isLoading}
                 style={{ width: '100vw', marginBottom: '10px' }}
@@ -203,6 +257,75 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                         }
                     ]}>
                     <InputNumber
+                        placeholder='Nhập giá món ăn'
+                        style={{ width: '100%' }}
+                        min={0}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                        parser={(value) => value!.replace(/\./g, '')}
+                    />
+                </Form.Item>
+            </Form>
+        </Modal>
+    )
+}
+
+function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct, data }) {
+    const initialValues = {
+        myProducts: data?.product_name || '',
+        myPrice: data?.product_price ? parseInt(data.product_price) : 0,
+        myKey: data?.id || ''
+    };
+
+    useEffect(() => {
+        if (isModalOpen && data) {
+            form.resetFields();
+            form.setFieldsValue(initialValues);
+        }
+    }, [isModalOpen, data, initialValues, form]);
+
+    return (
+        <Modal title="Thông tin món ăn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+            <Form
+                form={form}
+                name="basic"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                style={{ maxWidth: 600 }}
+                initialValues={initialValues ? initialValues : {}}
+                autoComplete="off"
+                className='createForm'
+                onFinish={handleCreateProduct}
+            >
+                <Form.Item
+                    name="myKey"
+                    noStyle
+                >
+                    <Input type="hidden" />
+                </Form.Item>
+                <Form.Item
+                    label='Tên món ăn: '
+                    name={'myProducts'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng nhập tên món ăn"
+                        }
+                    ]}>
+                    <Input placeholder='Nhập tên món ăn' />
+                </Form.Item>
+                <Form.Item
+                    label='Giá (VND): '
+                    name={'myPrice'}
+                    rules={[
+                        {
+                            required: true,
+                            type: 'number',
+                            message: "Vui lòng nhập giá tiền"
+                        }
+                    ]}>
+                    <InputNumber
+                        // defaultValue={data[0]?.product_price}
                         placeholder='Nhập giá món ăn'
                         style={{ width: '100%' }}
                         min={0}

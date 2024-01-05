@@ -51,8 +51,7 @@ class AdminController extends Controller
     #endregion
 
     #region Product
-    public function get_product(Request $request)
-    {
+    public function get_product(Request $request){
         $perPage = 5; // Số lượng dòng mỗi trang    
         $searchValue = $request->product_name;
         $pageNumber = $request->page; 
@@ -61,7 +60,7 @@ class AdminController extends Controller
         if ($searchValue) {
             $query->where('product_name', 'like', '%' . $searchValue . '%');
         }
-        $query->orderBy('id','desc');
+        $query->orderBy('id', 'desc');
         $data = $query->paginate($perPage, ['*'], 'page', $pageNumber)->map(function ($item) {
             return [
                 'id' => $item->id,
@@ -76,6 +75,12 @@ class AdminController extends Controller
         $data->put('total_pages', $totalPages);
         return response()->json($data);
     }
+
+    public function get_product_detail($id){
+        $data = Product::where('id',$id)->get();
+        return response()->json($data);
+    }
+
     public function add_product(Request $request)
     {
         $validator = Validator::make($request->all(), [
