@@ -37,7 +37,7 @@ const SideMenuAdmin = () => {
                     {
                         label: "Tôi",
                         icon: <UserOutlined />,
-                        key: '/admin/customers'
+                        key: '/admin/customers1'
                     },
                 ]}  >
 

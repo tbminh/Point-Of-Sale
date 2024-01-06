@@ -127,7 +127,7 @@ class AdminController extends Controller
             ];
         });
         $totalItems = $query->paginate($perPage, ['*'], 'page', $pageNumber)->total();
-        $totalPages = ceil($totalItems / $perPage);
+        $totalPages = $totalItems;
 
         // Thêm thông tin về tổng số trang vào dữ liệu trả về
         $data->put('total_pages', $totalPages);

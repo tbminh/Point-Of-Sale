@@ -3,8 +3,7 @@ import React, { useState, useEffect } from "react"
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
 import axios from "axios";
-import { connect_string } from "../../Api";
-
+import { connect_string, token } from "../../Api";
 const Products = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -17,6 +16,7 @@ const Products = () => {
     const [formCreate] = Form.useForm();
     const [formEdit] = Form.useForm();
     const { Search } = Input;
+
 
 
     const showModal = (modalName) => {

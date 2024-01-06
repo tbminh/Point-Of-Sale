@@ -34,7 +34,7 @@ const AppFooterAdmin = () => {
                 {
                     label: "",
                     icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignsItem:'center'}}> <UsergroupAddOutlined  /> Users</div>,
-                    key: '/admin/tables'
+                    key: '/admin/tables1'
                 },
                 {
                     label: "",
