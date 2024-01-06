@@ -23,12 +23,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/register', [UserController::class, 'register']);
 
-// Route::middleware('auth:sanctum')->group(function () {
+Route::controller(UserController::class)->group(function () {
     #region User
     Route::get('/get-user',[AdminController::class,'get_user']);
     Route::post('/add-user',[AdminController::class,'add_user']);
     Route::post('/update-user/{id}',[AdminController::class,'update_user']);
     Route::post('/delete-product/{id}',[AdminController::class,'delete_user']);
+    Route::post('/logout', [UserController::class, 'logout']);
     #endregion
 
     #region Product
@@ -37,7 +38,6 @@ Route::post('/register', [UserController::class, 'register']);
     Route::post('/add-product',[AdminController::class,'add_product']);
     Route::post('/update-product/{id}',[AdminController::class,'update_product']);
     Route::post('/delete-product/{id}',[AdminController::class,'delete_product']);
-    Route::post('/logout', [UserController::class, 'logout']);
     #endregion
     #region Table
     Route::get('/get-table',[AdminController::class,'get_table']);
@@ -45,4 +45,4 @@ Route::post('/register', [UserController::class, 'register']);
     Route::post('/update-table/{id}',[AdminController::class,'update_table']);
     Route::post('/delete-table/{id}',[AdminController::class,'delete_table']);
     #endregion
-// });
+});
