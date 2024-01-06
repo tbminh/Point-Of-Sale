@@ -4,7 +4,7 @@ import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
 import axios from "axios";
 import { connect_string, token } from "../../Api";
-const Products = () => {
+const Tables = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isModalEditOpen, setIsModalEditOpen] = useState(false)
@@ -56,31 +56,30 @@ const Products = () => {
     }
 
     useEffect(() => {
-        handleGetAllProducts(1)
+        handleGetAll(1)
     }, [])
 
-    const handleDeleteProduct = (value, record) => {
+    const handleDelete= (value, record) => {
         const url = connect_string + 'delete-product/' + record.key
         axios.post(url).then(res => {
             if (res.data.message) {
                 message.success('Xóa thành công');
-                handleGetAllProducts(curentPage)
+                handleGetAll(curentPage)
             }
         })
 
     }
 
-    const handleGetAllProducts = (page, product_name?) => {
+    const handleGetAll = (page, table_name?) => {
         setIsLoading(true)
         const data = {
             page: page,
-            product_name: product_name
+            table_name: table_name
         }
-        axios.post(connect_string + 'get-product', data).then(res => {
+        axios.post(connect_string + 'get-table', data).then(res => {
             const arr = Object.values(res.data).slice(0, -1).map((item: any, index) => ({
                 id: index + 1,
-                productName: item.product_name,
-                price: item.product_price,
+                tableName: item.table_name,
                 key: item.id
             }));
             setTotalPage(res.data.total_pages)
@@ -90,15 +89,14 @@ const Products = () => {
     }
 
     const handleCreateProduct = (values) => {
-        const url = connect_string + 'add-product'
+        const url = connect_string + 'add-table'
         const data = {
-            product_name: values.myProducts,
-            product_price: values.myPrice
+            table_name: values.myTableName,
         }
         axios.post(url, data).then(res => {
             if (res.data.message) {
                 message.success('Thêm thành công')
-                handleGetAllProducts(1)
+                handleGetAll(1)
                 formCreate.resetFields()
             }
         }).catch(() => {
@@ -109,8 +107,7 @@ const Products = () => {
     const handleEditProduct = (values) => {
         const url = connect_string + "update-product/" + values.myKey
         const data = {
-            product_name: values.myProducts,
-            product_price: values.myPrice
+            table_name: values.myTableName,
         }
         axios.post(url, data).then(res => {
             if (res.data) {
@@ -118,7 +115,7 @@ const Products = () => {
                 axios.get(url).then(res => {
                     setData(res.data[0]);
                 })
-                handleGetAllProducts(curentPage)
+                handleGetAll(curentPage)
                 message.success("Cập nhật thành công")
             }
         }).catch(() => {
@@ -128,7 +125,7 @@ const Products = () => {
 
     const handleSearch = (value) => {
         const text = value.target.value
-        handleGetAllProducts(1,text)
+        handleGetAll(1,text)
     }
 
 
@@ -139,21 +136,24 @@ const Products = () => {
             key: 'id',
         },
         {
-            title: 'Tên món',
-            dataIndex: 'productName',
-            key: 'productName',
+            title: 'Tên bàn',
+            dataIndex: 'tableName',
+            key: 'tableName',
         },
         {
-            title: 'Giá',
-            dataIndex: 'price',
-            key: 'price',
-            render: (value) => {
-                const formattedPrice = Number(value).toLocaleString('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                });
-                return formattedPrice;
-            },
+            title: 'Trạng thái',
+            dataIndex: 'tableStatus',
+            key: 'tableStatus',
+            render: (value, record) => {
+                let color = record === 0 ? 'green' : 'red'
+                let data = record === 0 ? 'Có khách' : 'Chưa có khách'
+                return (
+                    <Button ghost style={{ color: color, borderColor: 'black' }} disabled>
+                        {data}
+                    </Button>
+                )
+
+            }
         },
         {
             title: '',
@@ -162,9 +162,9 @@ const Products = () => {
             render: (value, record) => (
                 <Space>
                     <Popconfirm
-                        title="Xóa món ăn"
-                        description="Bạn có chắc chắn muốn xóa món ăn?"
-                        onConfirm={(value) => handleDeleteProduct(value, record)}
+                        title="Xóa bàn"
+                        description="Bạn có chắc chắn muốn xóa bàn?"
+                        onConfirm={(value) => handleDelete(value, record)}
                         // onCancel={cancel}
                         okText="Đồng ý"
                         cancelText="Hủy"
@@ -189,7 +189,6 @@ const Products = () => {
         },
 
     ];
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Món Ăn</Typography.Title>
@@ -203,7 +202,7 @@ const Products = () => {
             <ModalCreate
                 form={formCreate}
                 handleCancel={() => handleCancel('create')}
-                handleCreateProduct={() => handleCreateProduct}
+                handleCreateProduct={(value) => handleCreateProduct(value)}
                 handleOk={() => handleOk('create')}
                 isModalOpen={isModalOpen} />
             <ModalEdit
@@ -221,7 +220,7 @@ const Products = () => {
                 pageSize={5}
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 showSizeChanger={false}
-                onChange={(page) => { handleGetAllProducts(page), setCurentPage(page) }} />
+                onChange={(page) => { handleGetAll(page), setCurentPage(page) }} />
             <Table
                 loading={isLoading}
                 style={{ width: '100vw' }}
@@ -248,7 +247,7 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                 onFinish={handleCreateProduct}>
                 <Form.Item
                     label='Tên món ăn: '
-                    name={'myProducts'}
+                    name={'myTableName'}
                     rules={[
                         {
                             required: true,
@@ -258,24 +257,7 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                     ]}>
                     <Input placeholder='Nhập tên món ăn' />
                 </Form.Item>
-                <Form.Item
-                    label='Giá (VND): '
-                    name={'myPrice'}
-                    rules={[
-                        {
-                            required: true,
-                            type: 'number',
-                            message: "Vui lòng nhập giá tiền"
-                        }
-                    ]}>
-                    <InputNumber
-                        placeholder='Nhập giá món ăn'
-                        style={{ width: '100%' }}
-                        min={0}
-                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                        parser={(value) => value!.replace(/\./g, '')}
-                    />
-                </Form.Item>
+                
             </Form>
         </Modal>
     )
@@ -283,8 +265,7 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
 
 function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct, data }) {
     const initialValues = {
-        myProducts: data?.product_name || '',
-        myPrice: data?.product_price ? parseInt(data.product_price) : 0,
+        myTableName: data?.table_name || '',
         myKey: data?.id || ''
     };
 
@@ -296,7 +277,7 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
     }, [isModalOpen, data, initialValues, form]);
 
     return (
-        <Modal title="Thông tin món ăn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Modal title="Thông tin bàn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <Form
                 form={form}
                 name="basic"
@@ -316,39 +297,20 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
                 </Form.Item>
                 <Form.Item
                     label='Tên món ăn: '
-                    name={'myProducts'}
+                    name={'myTableName'}
                     rules={[
                         {
                             required: true,
                             type: "string",
-                            message: "Vui lòng nhập tên món ăn"
+                            message: "Vui lòng nhập tên bàn"
                         }
                     ]}>
-                    <Input placeholder='Nhập tên món ăn' />
-                </Form.Item>
-                <Form.Item
-                    label='Giá (VND): '
-                    name={'myPrice'}
-                    rules={[
-                        {
-                            required: true,
-                            type: 'number',
-                            message: "Vui lòng nhập giá tiền"
-                        }
-                    ]}>
-                    <InputNumber
-                        // defaultValue={data[0]?.product_price}
-                        placeholder='Nhập giá món ăn'
-                        style={{ width: '100%' }}
-                        min={0}
-                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                        parser={(value) => value!.replace(/\./g, '')}
-                    />
+                    <Input placeholder='Nhập tên bàn' />
                 </Form.Item>
             </Form>
         </Modal>
     )
 }
 
-export default Products
+export default Tables
 

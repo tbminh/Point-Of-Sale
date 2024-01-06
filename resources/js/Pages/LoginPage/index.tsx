@@ -14,6 +14,7 @@ const LoginPage = () => {
             password: values.myPassword,
         });
         console.log('Đăng nhập thành công', response.data);
+        document.cookie = `token=${response.data.authorization.token}; path=/;`;
         navigate('/admin/dashboard')
     }
     

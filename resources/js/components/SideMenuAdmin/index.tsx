@@ -1,7 +1,9 @@
 import { Menu } from "antd"
-import { AppstoreOutlined, ShopOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons"
+import { AppstoreOutlined, ShopOutlined, ShoppingCartOutlined, UserOutlined, UsergroupAddOutlined } from "@ant-design/icons"
 import React from "react"
 import { useNavigate } from "react-router-dom"
+import { FaBowlFood, FaToiletsPortable   } from "react-icons/fa6";
+
 const SideMenuAdmin = () => {
     const navigate = useNavigate()
     return (
@@ -13,24 +15,29 @@ const SideMenuAdmin = () => {
                 style={{fontSize:'15px', fontWeight:'500'}}
                 items={[
                     {
-                        label: "Bàn",
+                        label: "Trang chủ",
                         icon: <AppstoreOutlined />,
                         key: '/admin/dashboard'
                     },
                     {
                         label: "Món ăn",
-                        icon: <ShopOutlined />,
+                        icon: <FaBowlFood />,
                         key: '/admin/products'
                     },
                     {
-                        label: "Người dùng",
-                        icon: <ShoppingCartOutlined />,
-                        key: '/admin/users'
+                        label: "Bàn",
+                        icon: <FaToiletsPortable />,
+                        key: '/admin/tables'
                     },
                     {
-                        label: "Customers",
-                        icon: <UserOutlined />,
+                        label: "Người dùng",
+                        icon: <UsergroupAddOutlined />,
                         key: '/admin/customers'
+                    },
+                    {
+                        label: "Tôi",
+                        icon: <UserOutlined />,
+                        key: '/admin/customers1'
                     },
                 ]}  >
 
