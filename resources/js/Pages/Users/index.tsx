@@ -4,7 +4,7 @@ import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
 import axios from "axios";
 import { connect_string } from "../../Api";
-const Tables = () => {
+const Users = () => {
     //#region Columns
     const columns = [
         {
@@ -321,5 +321,5 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
     )
 }
 
-export default Tables
+export default Users
 

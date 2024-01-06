@@ -9,17 +9,39 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
+    public function refresh(){
+        return response()->json([
+            'user' => Auth::user(),
+            'authorisation' => [
+                'token' => Auth::refresh(),
+                'type' => 'bearer',
+            ]
+        ]);
+    }
     public function login(Request $request){
         $credentials = $request->only('user_name', 'password');
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->createToken('auth-token')->plainTextToken;
-            return response()->json(['token' => $token], 200);
+        $token = Auth::attempt($credentials);
+        
+        if (!$token) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
         }
-        return response()->json(['message' => 'Invalid credentials'], 401);
+
+        $user = Auth::user();
+        return response()->json([
+            'user' => $user,
+            'authorization' => [
+                'token' => $token,
+                'type' => 'bearer',
+            ]
+        ]);
     }
-    public function register(Request $request)
-    {
+    public function register(Request $request){
         $validator = Validator::make($request->all(), [
             'user_name' => 'required|string|unique:users,user_name',
             'full_name' => 'required|string',
@@ -39,8 +61,7 @@ class UserController extends Controller
     }
     public function logout(Request $request)
     {
-        $user = Auth::user();
-        $user->currentAccessToken()->delete();
+        Auth::logout();
         return response()->json(['message' => 'Logged out'], 200);
     }
 }

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
 {
-    #region USer
+    #region User
     public function get_user()
     {
         $product = User::orderBy('id', 'DESC')->get();
@@ -49,7 +49,6 @@ class AdminController extends Controller
         return response()->json(['message' => 'Success'], 200);
     }
     #endregion
-
     #region Product
     public function get_product(Request $request){
         $perPage = 5; // Số lượng dòng mỗi trang    
@@ -81,8 +80,7 @@ class AdminController extends Controller
         return response()->json($data);
     }
 
-    public function add_product(Request $request)
-    {
+    public function add_product(Request $request){
         $validator = Validator::make($request->all(), [
             'product_name' => 'required|string|unique:products,product_name',
         ]);
@@ -95,25 +93,45 @@ class AdminController extends Controller
         ]);
         return response()->json(['message' => 'Thêm thành công'], 201);
     }
-    public function update_product($id, Request $request)
-    {
-        Product::where('id', $id)->update([
+    public function update_product($id, Request $request){
+        $product = Product::where('id', $id)->update([
             'product_name' => $request->product_name,
             'product_price' => $request->product_price,
         ]);
+        if ($product === 0){
+            return response()->json(['message' => 'Fail'], 404);
+        }
         return response()->json(['message' => 'Success'], 200);
     }
-    public function delete_product($id)
-    {
+    public function delete_product($id){
         Product::where('id', $id)->delete();
         return response()->json(['message' => 'Success'], 200);
     }
     #endregion
     #region Table
-    public function get_table()
+    public function get_table(Request $request)
     {
-        $table = Table::orderBy('id', 'DESC')->get();
-        return response()->json(['list' => $table]);
+        $perPage = 5; // Số lượng dòng mỗi trang    
+        $searchValue = $request->table_name;
+        $pageNumber = $request->page; 
+        $query = Table::query();
+
+        if ($searchValue) {
+            $query->where('table_name', 'like', '%' . $searchValue . '%');
+        }
+        $query->orderBy('id', 'desc');
+        $data = $query->paginate($perPage, ['*'], 'page', $pageNumber)->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'table_name' => $item->table_name,
+            ];
+        });
+        $totalItems = $query->paginate($perPage, ['*'], 'page', $pageNumber)->total();
+        $totalPages = ceil($totalItems / $perPage);
+
+        // Thêm thông tin về tổng số trang vào dữ liệu trả về
+        $data->put('total_pages', $totalPages);
+        return response()->json($data);
     }
     public function add_table(Request $request)
     {

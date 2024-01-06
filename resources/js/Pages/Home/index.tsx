@@ -1,8 +1,9 @@
 import React from "react"
-const Home = () =>{
-    return(
+import AppHeader from "../../components/AppHeader"
+const Home = () => {
+    return (
         <div className="AppHome">
-            <h1>DUY</h1>
+            <AppHeader />
         </div>
     )
 }
