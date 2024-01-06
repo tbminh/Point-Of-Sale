@@ -4,9 +4,71 @@ import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
 import axios from "axios";
 import { connect_string } from "../../Api";
+const Tables = () => {
+    //#region Columns
+    const columns = [
+        {
+            title: 'STT',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Tên bàn',
+            dataIndex: 'tableName',
+            key: 'tableName',
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'tableStatus',
+            key: 'tableStatus',
+            render: (value, record) => {
+                let color = record === 0 ? 'green' : 'red'
+                let data = record === 0 ? 'Có khách' : 'Chưa có khách'
+                return (
+                    <Button ghost style={{ color: color, borderColor: 'black' }} disabled>
+                        {data}
+                    </Button>
+                )
 
-const Products = () => {
+            }
+        },
+        {
+            title: '',
+            dataIndex: 'delete',
+            key: 'delete',
+            render: (value, record) => (
+                <Space>
+                    <Popconfirm
+                        title="Xóa bàn"
+                        description="Bạn có chắc chắn muốn xóa bàn?"
+                        onConfirm={(value) => handleDeleteProduct(value, record)}
+                        // onCancel={cancel}
+                        okText="Đồng ý"
+                        cancelText="Hủy"
+                    >
+                        < Button
+                            type="primary"
+                            danger
+                            icon={< DeleteOutlined />}
+                        />
+                    </Popconfirm>
 
+                    <Button
+                        type="primary"
+                        icon={<EditOutlined />}
+                        onClick={() => {
+                            handleShowModalEdit(record)
+                        }} />
+                </Space>
+            ),
+
+
+        },
+
+    ];
+    //#endregion
+
+    //#region  Varialble
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isModalEditOpen, setIsModalEditOpen] = useState(false)
     const [dataSource, setDataSource] = useState([])
@@ -17,8 +79,15 @@ const Products = () => {
     const [formCreate] = Form.useForm();
     const [formEdit] = Form.useForm();
     const { Search } = Input;
+    //#endregion
 
+    //#region useEffect
+    useEffect(() => {
+        handleGetAllProducts(1)
+    }, [])
+    //#endregion
 
+    //#region Logic
     const showModal = (modalName) => {
         if (modalName === 'create') {
             setIsModalOpen(true);
@@ -54,10 +123,6 @@ const Products = () => {
         })
 
     }
-
-    useEffect(() => {
-        handleGetAllProducts(1)
-    }, [])
 
     const handleDeleteProduct = (value, record) => {
         const url = connect_string + 'delete-product/' + record.key
@@ -128,71 +193,15 @@ const Products = () => {
 
     const handleSearch = (value) => {
         const text = value.target.value
-        handleGetAllProducts(1,text)
+        handleGetAllProducts(1, text)
     }
 
+    //#endregion
 
-    const columns = [
-        {
-            title: 'STT',
-            dataIndex: 'id',
-            key: 'id',
-        },
-        {
-            title: 'Tên món',
-            dataIndex: 'productName',
-            key: 'productName',
-        },
-        {
-            title: 'Giá',
-            dataIndex: 'price',
-            key: 'price',
-            render: (value) => {
-                const formattedPrice = Number(value).toLocaleString('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                });
-                return formattedPrice;
-            },
-        },
-        {
-            title: '',
-            dataIndex: 'delete',
-            key: 'delete',
-            render: (value, record) => (
-                <Space>
-                    <Popconfirm
-                        title="Xóa món ăn"
-                        description="Bạn có chắc chắn muốn xóa món ăn?"
-                        onConfirm={(value) => handleDeleteProduct(value, record)}
-                        // onCancel={cancel}
-                        okText="Đồng ý"
-                        cancelText="Hủy"
-                    >
-                        < Button
-                            type="primary"
-                            danger
-                            icon={< DeleteOutlined />}
-                        />
-                    </Popconfirm>
-
-                    <Button
-                        type="primary"
-                        icon={<EditOutlined />}
-                        onClick={() => {
-                            handleShowModalEdit(record)
-                        }} />
-                </Space>
-            ),
-
-
-        },
-
-    ];
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Món Ăn</Typography.Title>
+            <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Bàn</Typography.Title>
             <FloatButton
                 shape="circle"
                 type="primary"
@@ -235,7 +244,7 @@ const Products = () => {
 
 function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct }) {
     return (
-        <Modal title="Thêm món ăn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Modal title="Thêm bàn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <Form
                 form={form}
                 name="basic"
@@ -247,34 +256,16 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                 className='createForm'
                 onFinish={handleCreateProduct}>
                 <Form.Item
-                    label='Tên món ăn: '
-                    name={'myProducts'}
+                    label='Tên bàn: '
+                    name={'myTableName'}
                     rules={[
                         {
                             required: true,
                             type: "string",
-                            message: "Vui lòng nhập tên món ăn"
+                            message: "Vui lòng nhập tên bàn"
                         }
                     ]}>
-                    <Input placeholder='Nhập tên món ăn' />
-                </Form.Item>
-                <Form.Item
-                    label='Giá (VND): '
-                    name={'myPrice'}
-                    rules={[
-                        {
-                            required: true,
-                            type: 'number',
-                            message: "Vui lòng nhập giá tiền"
-                        }
-                    ]}>
-                    <InputNumber
-                        placeholder='Nhập giá món ăn'
-                        style={{ width: '100%' }}
-                        min={0}
-                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                        parser={(value) => value!.replace(/\./g, '')}
-                    />
+                    <Input placeholder='Nhập tên bàn' />
                 </Form.Item>
             </Form>
         </Modal>
@@ -283,8 +274,7 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
 
 function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct, data }) {
     const initialValues = {
-        myProducts: data?.product_name || '',
-        myPrice: data?.product_price ? parseInt(data.product_price) : 0,
+        myTableName: data?.product_name || '',
         myKey: data?.id || ''
     };
 
@@ -296,7 +286,7 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
     }, [isModalOpen, data, initialValues, form]);
 
     return (
-        <Modal title="Thông tin món ăn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Modal title="Thông tin bàn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <Form
                 form={form}
                 name="basic"
@@ -315,40 +305,21 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
                     <Input type="hidden" />
                 </Form.Item>
                 <Form.Item
-                    label='Tên món ăn: '
-                    name={'myProducts'}
+                    label='Tên bàn: '
+                    name={'myTableName'}
                     rules={[
                         {
                             required: true,
                             type: "string",
-                            message: "Vui lòng nhập tên món ăn"
+                            message: "Vui lòng nhập tên bàn"
                         }
                     ]}>
-                    <Input placeholder='Nhập tên món ăn' />
-                </Form.Item>
-                <Form.Item
-                    label='Giá (VND): '
-                    name={'myPrice'}
-                    rules={[
-                        {
-                            required: true,
-                            type: 'number',
-                            message: "Vui lòng nhập giá tiền"
-                        }
-                    ]}>
-                    <InputNumber
-                        // defaultValue={data[0]?.product_price}
-                        placeholder='Nhập giá món ăn'
-                        style={{ width: '100%' }}
-                        min={0}
-                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                        parser={(value) => value!.replace(/\./g, '')}
-                    />
+                    <Input placeholder='Nhập tên bàn' />
                 </Form.Item>
             </Form>
         </Modal>
     )
 }
 
-export default Products
+export default Tables
 

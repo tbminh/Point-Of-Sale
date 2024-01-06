@@ -2,6 +2,8 @@ import { Menu } from "antd"
 import React from "react"
 import { useNavigate } from "react-router-dom"
 import { AppstoreOutlined, ShopOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons"
+import { FaBowlFood,FaToiletsPortable  } from "react-icons/fa6";
+
 import './styles.scss'
 const AppFooterAdmin = () => {
     const navigate = useNavigate()
@@ -20,13 +22,13 @@ const AppFooterAdmin = () => {
                 },
                 {
                     label: "",
-                    icon: <ShopOutlined />,
+                    icon: <FaBowlFood  />,
                     key: '/admin/products'
                 },
                 {
                     label: "",
-                    icon: <ShoppingCartOutlined />,
-                    key: '/admin/orders'
+                    icon: <FaToiletsPortable />,
+                    key: '/admin/tables'
                 },
                 {
                     label: "",

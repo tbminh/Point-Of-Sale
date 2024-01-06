@@ -19,4 +19,4 @@ Route::get('/', function () {
 
 Route::get('/{any}', function () {
     return view('welcome'); // 'app' là tên view hoặc file HTML của ứng dụng React
-})->where('welcome', '.*');
+})->where('any', '.*');
