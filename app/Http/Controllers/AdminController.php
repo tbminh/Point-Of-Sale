@@ -109,6 +109,10 @@ class AdminController extends Controller
     }
     #endregion
     #region Table
+    public function get_table_detail($id){
+        $data = Table::where('id',$id)->get();
+        return response()->json($data);
+    }
     public function get_table(Request $request)
     {
         $perPage = 5; // Số lượng dòng mỗi trang    
