@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Http\Response;
 
 class UserController extends Controller
 {
@@ -13,7 +16,8 @@ class UserController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
-    public function refresh(){
+    public function refresh()
+    {
         return response()->json([
             'user' => Auth::user(),
             'authorisation' => [
@@ -22,10 +26,11 @@ class UserController extends Controller
             ]
         ]);
     }
-    public function login(Request $request){
+    public function login(Request $request)
+    {
         $credentials = $request->only('user_name', 'password');
         $token = Auth::attempt($credentials);
-        
+
         if (!$token) {
             return response()->json([
                 'message' => 'Unauthorized',
@@ -41,7 +46,8 @@ class UserController extends Controller
             ]
         ]);
     }
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'user_name' => 'required|string|unique:users,user_name',
             'full_name' => 'required|string',
@@ -51,7 +57,7 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
         $user = User::create([
-            'role'=> $request->role,
+            'role' => $request->role,
             'user_name' => $request->user_name,
             'full_name' => $request->full_name,
             'password' => Hash::make($request->password),
@@ -61,7 +67,15 @@ class UserController extends Controller
     }
     public function logout(Request $request)
     {
-        Auth::logout();
-        return response()->json(['message' => 'Logged out'], 200);
+        $cookie = Cookie::forget('token');
+        // Tạo response với JSON trả về
+        $response = response()->json(['message' => 'Logout successful']);
+
+        // Thêm cookie vào response
+        $response->withCookie($cookie);
+
+        // Thực hiện các bước logout khác nếu cần
+
+        return $response;
     }
 }
