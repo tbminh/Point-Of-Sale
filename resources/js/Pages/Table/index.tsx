@@ -48,7 +48,7 @@ const Tables = () => {
 
     const handleShowModalEdit = (record) => {
         showModal('edit');
-        const url = connect_string + 'get-product-detail/' + record.key
+        const url = connect_string + 'get-table-detail/' + record.key
         axios.get(url).then(res => {
             setData(res.data[0]);
         })
@@ -60,7 +60,7 @@ const Tables = () => {
     }, [])
 
     const handleDelete= (value, record) => {
-        const url = connect_string + 'delete-product/' + record.key
+        const url = connect_string + 'delete-table/' + record.key
         axios.post(url).then(res => {
             if (res.data.message) {
                 message.success('Xóa thành công');
@@ -88,7 +88,7 @@ const Tables = () => {
         })
     }
 
-    const handleCreateProduct = (values) => {
+    const handleCreate = (values) => {
         const url = connect_string + 'add-table'
         const data = {
             table_name: values.myTableName,
@@ -104,14 +104,14 @@ const Tables = () => {
         })
     }
 
-    const handleEditProduct = (values) => {
-        const url = connect_string + "update-product/" + values.myKey
+    const handleEdit = (values) => {
+        const url = connect_string + "update-table/" + values.myKey
         const data = {
             table_name: values.myTableName,
         }
         axios.post(url, data).then(res => {
             if (res.data) {
-                const url = connect_string + 'get-product-detail/' + values.myKey
+                const url = connect_string + 'get-table-detail/' + values.myKey
                 axios.get(url).then(res => {
                     setData(res.data[0]);
                 })
@@ -202,13 +202,13 @@ const Tables = () => {
             <ModalCreate
                 form={formCreate}
                 handleCancel={() => handleCancel('create')}
-                handleCreateProduct={(value) => handleCreateProduct(value)}
+                handleCreateProduct={(value) => handleCreate(value)}
                 handleOk={() => handleOk('create')}
                 isModalOpen={isModalOpen} />
             <ModalEdit
                 form={formEdit}
                 handleCancel={() => handleCancel('edit')}
-                handleCreateProduct={(value) => handleEditProduct(value)}
+                handleCreateProduct={(value) => handleEdit(value)}
                 handleOk={() => handleOk('edit')}
                 isModalOpen={isModalEditOpen}
                 data={data} />
@@ -296,7 +296,7 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
                     <Input type="hidden" />
                 </Form.Item>
                 <Form.Item
-                    label='Tên món ăn: '
+                    label='Tên bàn: '
                     name={'myTableName'}
                     rules={[
                         {
