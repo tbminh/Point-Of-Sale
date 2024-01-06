@@ -5,11 +5,12 @@ import { useNavigate } from "react-router-dom"
 const SideMenuAdmin = () => {
     const navigate = useNavigate()
     return (
-        <div className="sideMenu">
+        <div className="sideMenu" >
             <Menu
                 onClick={(item) => {
                     navigate(item.key)
                 }}
+                style={{fontSize:'15px', fontWeight:'500'}}
                 items={[
                     {
                         label: "Bàn",

@@ -10,14 +10,14 @@
     align-items: flex-start;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 650px) {
     .mobileFooter{
         display: none;
     }
   
 }
 
-@media (max-width: 500px) {
+@media (max-width: 650px) {
     .mobileSide{
         display: none;
     }

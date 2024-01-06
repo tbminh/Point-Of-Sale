@@ -3,15 +3,20 @@ import React, { useState } from "react"
 import { GoogleOutlined,FacebookOutlined,InstagramOutlined } from "@ant-design/icons"
 import './styles.scss';
 import axios from 'axios';
-
+import {connect_string} from '../../Api';
+import { useNavigate } from "react-router-dom"
 const LoginPage = () => {
+    const navigate = useNavigate()
+
     const handleLogin = async (values) => {
-        const response = await axios.post('/api/login', {
-        UserName: values.myUserName,
-        Password: values.myPassword,
+        const response = await axios.post(connect_string + 'login', {
+            user_name: values.myUserName,
+            password: values.myPassword,
         });
         console.log('Đăng nhập thành công', response.data);
+        navigate('/admin/dashboard')
     }
+    
     return (
         <div className="appBg">
             <Form className="loginForm" onFinish={handleLogin}>

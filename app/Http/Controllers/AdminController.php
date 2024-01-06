@@ -68,7 +68,7 @@ class AdminController extends Controller
             ];
         });
         $totalItems = $query->paginate($perPage, ['*'], 'page', $pageNumber)->total();
-        $totalPages = ceil($totalItems / $perPage);
+        $totalPages =$totalItems;
 
         // Thêm thông tin về tổng số trang vào dữ liệu trả về
         $data->put('total_pages', $totalPages);
@@ -112,7 +112,7 @@ class AdminController extends Controller
     public function get_table(Request $request)
     {
         $perPage = 5; // Số lượng dòng mỗi trang    
-        $searchValue = $request->product_name;
+        $searchValue = $request->table_name;
         $pageNumber = $request->page; 
         $query = Table::query();
 
@@ -123,7 +123,7 @@ class AdminController extends Controller
         $data = $query->paginate($perPage, ['*'], 'page', $pageNumber)->map(function ($item) {
             return [
                 'id' => $item->id,
-                'table_name' => $item->product_name,
+                'table_name' => $item->table_name,
             ];
         });
         $totalItems = $query->paginate($perPage, ['*'], 'page', $pageNumber)->total();

@@ -40,7 +40,7 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/delete-product/{id}',[AdminController::class,'delete_product']);
     #endregion
     #region Table
-    Route::get('/get-table',[AdminController::class,'get_table']);
+    Route::post('/get-table',[AdminController::class,'get_table']);
     Route::post('/add-table',[AdminController::class,'add_table']);
     Route::post('/update-table/{id}',[AdminController::class,'update_table']);
     Route::post('/delete-table/{id}',[AdminController::class,'delete_table']);
