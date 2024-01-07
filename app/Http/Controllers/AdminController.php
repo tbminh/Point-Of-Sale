@@ -18,6 +18,10 @@ class  AdminController extends Controller
         $product = User::orderBy('id', 'DESC')->get();
         return response()->json(['list' => $product]);
     }
+    public function get_user_detail($id){
+        $data = User::where('id',$id)->get();
+        return response()->json($data);
+    }
     public function add_user(Request $request)
     {
         $validator = Validator::make($request->all(), [
