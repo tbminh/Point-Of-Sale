@@ -23,22 +23,22 @@ const AppFooterAdmin = () => {
                 },
                 {
                     label: "",
-                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignsItem:'center'}}> <FaBowlFood  /> Món</div>,
+                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignItems:'center'}}> <FaBowlFood  /> Món</div>,
                     key: '/admin/products'
                 },
                 {
                     label: "",
-                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignsItem:'center'}}> <FaToiletsPortable /> Bàn</div>,
+                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignItems:'center'}}> <FaToiletsPortable /> Bàn</div>,
                     key: '/admin/tables'
                 },
                 {
                     label: "",
-                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignsItem:'center'}}> <UsergroupAddOutlined  /> Users</div>,
-                    key: '/admin/tables1'
+                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignItems:'center'}}> <UsergroupAddOutlined  /> Users</div>,
+                    key: '/admin/users'
                 },
                 {
                     label: "",
-                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignsItem:'center'}}> <UserOutlined /> Tôi</div>,
+                    icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignItems:'center'}}> <UserOutlined /> Tôi</div>,
                     key: '/'
                 },
             ]}  >

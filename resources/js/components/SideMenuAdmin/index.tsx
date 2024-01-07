@@ -32,7 +32,7 @@ const SideMenuAdmin = () => {
                     {
                         label: "Người dùng",
                         icon: <UsergroupAddOutlined />,
-                        key: '/admin/customers'
+                        key: '/admin/users'
                     },
                     {
                         label: "Tôi",
