@@ -191,7 +191,7 @@ const Products = () => {
     ];
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
             <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Món Ăn</Typography.Title>
             <FloatButton
                 shape="circle"

@@ -13,8 +13,8 @@ const AppFooterAdmin = () => {
             onClick={(item) => {
                 navigate(item.key)
             }}
-            style={{fontSize:'15px', fontWeight:'500', color:'gray'}}
-            mode='inline'
+            style={{fontSize:'13px', fontWeight:'500', color:'gray'}}
+            // mode='inline'
             items={[
                 {
                     label: "",
