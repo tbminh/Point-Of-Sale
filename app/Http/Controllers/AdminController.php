@@ -18,6 +18,10 @@ class AdminController extends Controller
         $product = User::orderBy('id', 'DESC')->get();
         return response()->json(['list' => $product]);
     }
+    public function get_user_detail($id){
+        $data = User::where('id',$id)->get();
+        return response()->json($data);
+    }
     public function add_user(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -31,15 +35,18 @@ class AdminController extends Controller
             'full_name' => $request->full_name,
             'user_name' => $request->user_name,
             'password' => Hash::make($request->password),
-            'phone' => Hash::make($request->password),
+            'phone' => $request->phone,
         ]);
         return response()->json(['message' => 'Thêm thành công'], 201);
     }
     public function update_user($id, Request $request)
     {
         User::where('id', $id)->update([
-            'product_name' => $request->product_name,
-            'product_price' => $request->product_price,
+            'role' => $request->role,
+            'full_name' => $request->full_name,
+            'user_name' => $request->user_name,
+            'password' => Hash::make($request->password),
+            'phone' => $request->phone,
         ]);
         return response()->json(['message' => 'Success'], 200);
     }
