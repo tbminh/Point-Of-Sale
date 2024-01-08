@@ -1,4 +1,4 @@
-import { Button, FloatButton, Modal, Space, Table, Typography, Form, message, Input, InputNumber, Popconfirm, Pagination } from "antd"
+import { Button, FloatButton, Modal, Space, Table, Typography, Form, message, Input, InputNumber, Popconfirm, Pagination, Select } from "antd"
 import React, { useState, useEffect } from "react"
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
@@ -13,24 +13,24 @@ const Users = () => {
             key: 'id',
         },
         {
-            title: 'Tên bàn',
-            dataIndex: 'tableName',
-            key: 'tableName',
+            title: 'Tên nguời dùng',
+            dataIndex: 'fullName',
+            key: 'fullName',
         },
         {
-            title: 'Trạng thái',
-            dataIndex: 'tableStatus',
-            key: 'tableStatus',
-            render: (value, record) => {
-                let color = record === 0 ? 'green' : 'red'
-                let data = record === 0 ? 'Có khách' : 'Chưa có khách'
-                return (
-                    <Button ghost style={{ color: color, borderColor: 'black' }} disabled>
-                        {data}
-                    </Button>
-                )
-
-            }
+            title: 'Tài khoản',
+            dataIndex: 'userName',
+            key: 'userName',
+        },
+        {
+            title: 'SĐT',
+            dataIndex: 'phone',
+            key: 'phone',
+        },
+        {
+            title: 'Quyền',
+            dataIndex: 'role',
+            key: 'role',
         },
         {
             title: '',
@@ -39,8 +39,8 @@ const Users = () => {
             render: (value, record) => (
                 <Space>
                     <Popconfirm
-                        title="Xóa bàn"
-                        description="Bạn có chắc chắn muốn xóa bàn?"
+                        title="Xóa người dùng"
+                        description="Bạn có chắc chắn muốn xóa người dùng?"
                         onConfirm={(value) => handleDelete(value, record)}
                         // onCancel={cancel}
                         okText="Đồng ý"
@@ -83,7 +83,7 @@ const Users = () => {
 
     //#region useEffect
     useEffect(() => {
-        handleGetAll(1)
+        handleGetAll()
     }, [])
     //#endregion
 
@@ -125,45 +125,49 @@ const Users = () => {
     }
 
     const handleDelete = (value, record) => {
-        const url = connect_string + 'delete-product/' + record.key
+        const url = connect_string + 'delete-user/' + record.key
         axios.post(url).then(res => {
             if (res.data.message) {
                 message.success('Xóa thành công');
-                handleGetAll(curentPage)
+                handleGetAll()
             }
         })
 
     }
 
-    const handleGetAll = (page, product_name?) => {
+    const handleGetAll = () => {
         setIsLoading(true)
-        const data = {
-            page: page,
-            product_name: product_name
-        }
-        axios.post(connect_string + 'get-product', data).then(res => {
-            const arr = Object.values(res.data).slice(0, -1).map((item: any, index) => ({
+        // const data = {
+        //     page: page,
+        //     product_name: product_name
+        // }
+        axios.get(connect_string + 'get-user').then(res => {
+            console.log(res.data.list)
+            const arr = res.data.list.map((item, index) => ({
                 id: index + 1,
-                productName: item.product_name,
-                price: item.product_price,
+                fullName: item.full_name,
+                phone: item.phone,
+                role: item.role,
+                userName: item.user_name,
                 key: item.id
             }));
-            setTotalPage(res.data.total_pages)
             setDataSource(arr)
             setIsLoading(false)
         })
     }
 
     const handleCreate = (values) => {
-        const url = connect_string + 'add-product'
+        const url = connect_string + 'add-user'
         const data = {
-            product_name: values.myProducts,
-            product_price: values.myPrice
+            role: values.myRole,
+            full_name: values.myFullName,
+            user_name: values.myUserName,
+            password: values.myPassword,
         }
         axios.post(url, data).then(res => {
             if (res.data.message) {
                 message.success('Thêm thành công')
-                handleGetAll(1)
+                handleGetAll()
                 formCreate.resetFields()
             }
         }).catch(() => {
@@ -183,7 +187,7 @@ const Users = () => {
                 axios.get(url).then(res => {
                     setData(res.data[0]);
                 })
-                handleGetAll(curentPage)
+                handleGetAll()
                 message.success("Cập nhật thành công")
             }
         }).catch(() => {
@@ -191,17 +195,17 @@ const Users = () => {
         })
     }
 
-    const handleSearch = (value) => {
-        const text = value.target.value
-        handleGetAll(1, text)
-    }
+    // const handleSearch = (value) => {
+    //     const text = value.target.value
+    //     handleGetAll()
+    // }
 
     //#endregion
 
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Bàn</Typography.Title>
+            <Typography.Title style={{ fontSize: '30px' }}>Danh Sách Người Dùng</Typography.Title>
             <FloatButton
                 shape="circle"
                 type="primary"
@@ -212,7 +216,7 @@ const Users = () => {
             <ModalCreate
                 form={formCreate}
                 handleCancel={() => handleCancel('create')}
-                handleCreateProduct={() => handleCreate}
+                handleCreateProduct={(value) => handleCreate(value)}
                 handleOk={() => handleOk('create')}
                 isModalOpen={isModalOpen} />
             <ModalEdit
@@ -222,15 +226,15 @@ const Users = () => {
                 handleOk={() => handleOk('edit')}
                 isModalOpen={isModalEditOpen}
                 data={data} />
-            <Search placeholder="Tìm kiếm...." onChange={handleSearch} enterButton />
-            <Pagination
+            {/* <Search placeholder="Tìm kiếm...." onChange={handleSearch} enterButton /> */}
+            {/* <Pagination
                 className="pagination"
                 defaultCurrent={1}
                 total={totalPage}
                 pageSize={5}
                 style={{ display: 'flex', justifyContent: 'flex-end' }}
                 showSizeChanger={false}
-                onChange={(page) => { handleGetAll(page), setCurentPage(page) }} />
+                onChange={(page) => { handleGetAll(page), setCurentPage(page) }} /> */}
             <Table
                 loading={isLoading}
                 style={{ width: '100vw' }}
@@ -244,7 +248,7 @@ const Users = () => {
 
 function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct }) {
     return (
-        <Modal title="Thêm bàn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Modal title="Thêm người dùng" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <Form
                 form={form}
                 name="basic"
@@ -256,16 +260,60 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                 className='createForm'
                 onFinish={handleCreateProduct}>
                 <Form.Item
-                    label='Tên bàn: '
-                    name={'myTableName'}
+                    label='Tên người dùng: '
+                    name={'myFullName'}
                     rules={[
                         {
                             required: true,
                             type: "string",
-                            message: "Vui lòng nhập tên bàn"
+                            message: "Vui lòng nhập tên người dùng"
                         }
                     ]}>
-                    <Input placeholder='Nhập tên bàn' />
+                    <Input placeholder='Nhập tên người dùng' />
+                </Form.Item>
+                <Form.Item
+                    label='Tài khoản: '
+                    name={'myUserName'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng nhập tài khoản"
+                        }
+                    ]}>
+                    <Input placeholder='Nhập tài khoản' />
+                </Form.Item>
+                <Form.Item
+                    label='Mật khẩu: '
+                    name={'myPassword'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng nhập mật khẩu"
+                        }
+                    ]}>
+                    <Input.Password placeholder='Nhập mật khẩu' />
+                </Form.Item>
+                <Form.Item
+                    label='Quyền: '
+                    name={'myRole'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            // message: "Vui lòng chọn quyền"
+                        }
+                    ]}>
+                    <Select
+                        defaultValue="Người dùng"
+                        style={{ width: 120 }}
+                        options={[
+                            { value: 'admin', label: 'Admin' },
+                            { value: 'manager', label: 'Quản lý' },
+                            { value: 'employee', label: 'Người dùng' },
+                        ]}
+                    />
                 </Form.Item>
             </Form>
         </Modal>
@@ -286,7 +334,7 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
     }, [isModalOpen, data, initialValues, form]);
 
     return (
-        <Modal title="Thông tin bàn" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <Modal title="Thông tin người dùng" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <Form
                 form={form}
                 name="basic"
