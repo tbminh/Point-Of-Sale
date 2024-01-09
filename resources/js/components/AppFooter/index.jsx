@@ -14,6 +14,7 @@ const AppFooter = () => {
                 onClick={(item) => {
                     navigate(item.key)
                 }}
+                defaultSelectedKeys={['/']}
                 style={{ fontSize: '13px', fontWeight: '500', color: 'white', background: '#3D4B64' }}
                 // mode='inline'
                 items={[

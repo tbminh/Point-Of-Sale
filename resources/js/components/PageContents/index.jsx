@@ -1,74 +1,40 @@
 import { Card, Space, Typography, List } from 'antd';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './styles.scss'
+import { connect_string } from '../../Api';
+import axios from 'axios';
 const PageContents = () => {
-    const src = "../../../../images/dinner-table.png"
-    const src1 = "../../../../images/table.png"
+    const imgOrder = "../../../../images/dinner-table.png"
+    const imgNoOrder = "../../../../images/table.png"
+    const [dataSource, setDataSource] = useState([])
+    const [loading, setLoading] = useState(false)
+    useEffect(() => {
+        handleGetAllTable()
+    }, [])
 
-    const data = [
-        {
-            title: 'Ant Design Title 1',
-            src: src
-        },
-        {
-            title: 'Ant Design Title 2',
-            src: src1
-        },
-        {
-            title: 'Ant Design Title 3',
-            src: src
-        },
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-        {
-            title: 'Ant Design Title 4',
-            src: src1
-        },
-    ];
+    const handleGetAllTable = () => {
+        setLoading(true)
+        const url = connect_string + "get-table-order"
+        axios.get(url).then(res => {
+            const arr = res.data.map((item, index) => ({
+                src: item.table_status === 1 ? imgOrder : imgNoOrder,
+                title: item.table_name,
+                id: item.id,
+                data: item
+            }))
+            setDataSource(arr)
+        }).finally(()=>{
+            setLoading(false)
+        })
+    }
 
     return (
-        <div style={{ display: 'flex', flex: 1, overflowY: 'auto', padding: 10,  }}>
+        <div style={{ display: 'flex', flex: 1, overflowY: 'auto', padding: 10, }}>
             <List
+                loading={loading}
+                loadMore
                 grid={{
-                    gutter:20,
+                    gutter: 20,
                     xs: 2,
                     sm: 3,
                     md: 5,
@@ -76,10 +42,10 @@ const PageContents = () => {
                     xl: 9,
                     xxl: 11,
                 }}
-                dataSource={data}
+                dataSource={dataSource}
                 renderItem={(item, index) => (
-                    <List.Item style={{display:'flex', justifyContent:'center'}}>
-                        <CardItem src={item.src} title={item.title} />
+                    <List.Item style={{ display: 'flex', justifyContent: 'center' }}>
+                        <CardItem src={item.src} title={item.title} data={item} />
                     </List.Item>
                 )}
             >
@@ -90,13 +56,13 @@ const PageContents = () => {
     )
 }
 
-const CardItem = ({ src, title }) => {
+const CardItem = ({ src, title, data }) => {
     return (
         <Card
             hoverable
             style={{
                 width: 128,
-                padding: 10,
+                padding: 20,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -108,11 +74,13 @@ const CardItem = ({ src, title }) => {
         >
             <Card.Meta
                 title={
-                    <Typography.Paragraph
-                        style={{ fontSize: '15px', fontWeight: 700, }}
-                    >
-                        {title}
-                    </Typography.Paragraph>
+                    <>
+                        <Typography.Paragraph
+                            style={{ fontSize: '15px', fontWeight: 700, }}
+                        >
+                            {title}
+                        </Typography.Paragraph>
+                    </>
                 }
             >
             </Card.Meta>
