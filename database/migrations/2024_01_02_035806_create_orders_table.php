@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('surcharge');
             $table->string('discount');
             $table->integer('user_id'); //Người tạo đơn
+            $table->string('order_status');
             $table->string('note');
             $table->datetime('date_order');
         });
