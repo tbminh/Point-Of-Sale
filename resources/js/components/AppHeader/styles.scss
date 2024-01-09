@@ -7,7 +7,7 @@
 }
 
 .shoppingCartIcon {
-    font-size: 30px;
+    font-size: 20px;
     margin-right: 16px;
     cursor: pointer;
 }
@@ -16,15 +16,3 @@
     margin-bottom: 0 !important;
 }
 
-@media (max-width:600px) {
-    .headerMenu{
-        display: none;
-    }
-}
-
-@media (min-width:600px) {
-    .menuIcon{
-        display: none;
-    }
-    
-}

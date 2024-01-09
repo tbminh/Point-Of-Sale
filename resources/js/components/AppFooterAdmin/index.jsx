@@ -13,7 +13,7 @@ const AppFooterAdmin = () => {
             onClick={(item) => {
                 navigate(item.key)
             }}
-            style={{fontSize:'13px', fontWeight:'500', color:'gray'}}
+            style={{fontSize:'13px', fontWeight:'500', color:'white', background:'#3D4B64'}}
             // mode='inline'
             items={[
                 {
@@ -39,7 +39,7 @@ const AppFooterAdmin = () => {
                 {
                     label: "",
                     icon: <div style={{display:'flex', flexDirection:'column',gap:'10px', alignItems:'center'}}> <UserOutlined /> Tôi</div>,
-                    key: '/'
+                    key: '/admin/my-infomation'
                 },
             ]}  >
 

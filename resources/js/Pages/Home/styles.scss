@@ -1,0 +1,20 @@
+.AppHome {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+}
+
+@media (min-width: 650px) {
+    .AppFooter {
+        display: none;
+    }
+
+}
+
+@media (max-width: 650px) {
+    .appHeader {
+        display: none;
+    }
+
+}

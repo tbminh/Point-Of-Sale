@@ -70,14 +70,14 @@ const Tables = () => {
 
     }
 
-    const handleGetAll = (page, table_name?) => {
+    const handleGetAll = (page, table_name) => {
         setIsLoading(true)
         const data = {
             page: page,
             table_name: table_name
         }
         axios.post(connect_string + 'get-table', data).then(res => {
-            const arr = Object.values(res.data).slice(0, -1).map((item: any, index) => ({
+            const arr = Object.values(res.data).slice(0, -1).map((item, index) => ({
                 id: index + 1,
                 tableName: item.table_name,
                 key: item.id

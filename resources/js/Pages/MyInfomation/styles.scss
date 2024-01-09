@@ -1,0 +1,13 @@
+.bgimg{
+    width: 240px;
+    height: 240px;
+    background-size: cover !important;
+    background: url('myinfomation.png');
+}
+
+.Info{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}

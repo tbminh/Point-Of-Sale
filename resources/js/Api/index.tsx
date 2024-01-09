@@ -10,6 +10,9 @@ cookies.forEach(cookie => {
     token = value;
   }
 });
+const userDataString  = sessionStorage.getItem('user_data');
+export const userData = userDataString ? JSON.parse(userDataString) : null;
+
 // Add a request interceptor
 axios.interceptors.request.use(function (config) {
   config.headers.Authorization =  `Bearer ${token}`;

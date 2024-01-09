@@ -1,4 +1,4 @@
-import { Button, FloatButton, Modal, Space, Table, Typography, Form, message, Input, InputNumber, Popconfirm, Pagination, Select } from "antd"
+import { Button, FloatButton, Modal, Space, Table, Typography, Form, message, Input, InputNumber, Popconfirm, Pagination, Select, Checkbox } from "antd"
 import React, { useState, useEffect } from "react"
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import './styles.scss'
@@ -13,9 +13,10 @@ const Users = () => {
             key: 'id',
         },
         {
-            title: 'Tên nguời dùng',
+            title: 'Tên người dùng',
             dataIndex: 'fullName',
             key: 'fullName',
+            width:150
         },
         {
             title: 'Tài khoản',
@@ -117,7 +118,7 @@ const Users = () => {
 
     const handleShowModalEdit = (record) => {
         showModal('edit');
-        const url = connect_string + 'get-product-detail/' + record.key
+        const url = connect_string + 'get-user-detail/' + record.key
         axios.get(url).then(res => {
             setData(res.data[0]);
         })
@@ -142,7 +143,6 @@ const Users = () => {
         //     product_name: product_name
         // }
         axios.get(connect_string + 'get-user').then(res => {
-            console.log(res.data.list)
             const arr = res.data.list.map((item, index) => ({
                 id: index + 1,
                 fullName: item.full_name,
@@ -163,6 +163,7 @@ const Users = () => {
             full_name: values.myFullName,
             user_name: values.myUserName,
             password: values.myPassword,
+            phone: values.myPhone
         }
         axios.post(url, data).then(res => {
             if (res.data.message) {
@@ -176,14 +177,22 @@ const Users = () => {
     }
 
     const handleEdit = (values) => {
-        const url = connect_string + "update-product/" + values.myKey
-        const data = {
-            product_name: values.myProducts,
-            product_price: values.myPrice
+        const url = connect_string + "update-user/" + values.myKey
+        let data = {
+            role: values.myRole,
+            full_name: values.myFullName,
+            user_name: values.myUserName,
+            phone: values.myPhone
+        }
+        if(values.myPassword === true){
+           data = {
+            ...data,
+            password: '12345678'
+           } 
         }
         axios.post(url, data).then(res => {
             if (res.data) {
-                const url = connect_string + 'get-product-detail/' + values.myKey
+                const url = connect_string + 'get-user-detail/' + values.myKey
                 axios.get(url).then(res => {
                     setData(res.data[0]);
                 })
@@ -194,11 +203,6 @@ const Users = () => {
             message.error("Cập nhật thất bại")
         })
     }
-
-    // const handleSearch = (value) => {
-    //     const text = value.target.value
-    //     handleGetAll()
-    // }
 
     //#endregion
 
@@ -238,15 +242,17 @@ const Users = () => {
             <Table
                 loading={isLoading}
                 style={{ width: '100vw' }}
-                pagination={false}
+                pagination={{ defaultPageSize: 5, position:['topRight ']}}
                 dataSource={dataSource}
                 columns={columns}
-                scroll={{ x: '600px' }} />
+                scroll={{ x: '700px' }}
+                />
         </div>
     )
 }
 
 function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct }) {
+    const [selectedRole, setSelectedRole] = useState('employee');
     return (
         <Modal title="Thêm người dùng" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
             <Form
@@ -270,6 +276,18 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                         }
                     ]}>
                     <Input placeholder='Nhập tên người dùng' />
+                </Form.Item>
+                <Form.Item
+                    label='SĐT: '
+                    name={'myPhone'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng nhập số điện thoại"
+                        }
+                    ]}>
+                    <Input addonBefore="+84" placeholder='Nhập số điện thoại' />
                 </Form.Item>
                 <Form.Item
                     label='Tài khoản: '
@@ -298,21 +316,23 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                 <Form.Item
                     label='Quyền: '
                     name={'myRole'}
+                    initialValue={selectedRole}
                     rules={[
                         {
                             required: true,
                             type: "string",
-                            // message: "Vui lòng chọn quyền"
+                            message: "Vui lòng chọn quyền"
                         }
                     ]}>
                     <Select
-                        defaultValue="Người dùng"
+                        // defaultValue="Người dùng"
                         style={{ width: 120 }}
                         options={[
                             { value: 'admin', label: 'Admin' },
                             { value: 'manager', label: 'Quản lý' },
                             { value: 'employee', label: 'Người dùng' },
                         ]}
+                        onChange={(value) => setSelectedRole(value)}
                     />
                 </Form.Item>
             </Form>
@@ -322,7 +342,10 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
 
 function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProduct, data }) {
     const initialValues = {
-        myTableName: data?.product_name || '',
+        myRole: data.role || 'employee',
+        myFullName: data.full_name || '',
+        myUserName: data.user_name || '',
+        myPhone: data.phone || '',
         myKey: data?.id || ''
     };
 
@@ -353,16 +376,67 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
                     <Input type="hidden" />
                 </Form.Item>
                 <Form.Item
-                    label='Tên bàn: '
-                    name={'myTableName'}
+                    label='Tên người dùng: '
+                    name={'myFullName'}
                     rules={[
                         {
                             required: true,
                             type: "string",
-                            message: "Vui lòng nhập tên bàn"
+                            message: "Vui lòng nhập tên người dùng"
                         }
                     ]}>
-                    <Input placeholder='Nhập tên bàn' />
+                    <Input placeholder='Nhập tên người dùng' />
+                </Form.Item>
+                <Form.Item
+                    label='SĐT: '
+                    name={'myPhone'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng nhập số điện thoại"
+                        }
+                    ]}>
+                    <Input addonBefore="+84" placeholder='Nhập số điện thoại' />
+                </Form.Item>
+                <Form.Item
+                    label='Tài khoản: '
+                    name={'myUserName'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng nhập tài khoản"
+                        }
+                    ]}>
+                    <Input placeholder='Nhập tài khoản' />
+                </Form.Item>
+                <Form.Item
+                    name="myPassword"
+                    valuePropName="checked"
+                    wrapperCol={{ offset: 8, span: 16 }}
+                >
+                    <Checkbox>Cập nhật lại mật khẩu</Checkbox>
+                </Form.Item>
+                <Form.Item
+                    label='Quyền: '
+                    name={'myRole'}
+                    rules={[
+                        {
+                            required: true,
+                            type: "string",
+                            message: "Vui lòng chọn quyền"
+                        }
+                    ]}>
+                    <Select
+                        // defaultValue="Người dùng"
+                        style={{ width: 120 }}
+                        options={[
+                            { value: 'admin', label: 'Admin' },
+                            { value: 'manager', label: 'Quản lý' },
+                            { value: 'employee', label: 'Người dùng' },
+                        ]}
+                    />
                 </Form.Item>
             </Form>
         </Modal>

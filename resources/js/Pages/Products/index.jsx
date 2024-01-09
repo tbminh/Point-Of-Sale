@@ -70,14 +70,14 @@ const Products = () => {
 
     }
 
-    const handleGetAllProducts = (page, product_name?) => {
+    const handleGetAllProducts = (page, product_name) => {
         setIsLoading(true)
         const data = {
             page: page,
             product_name: product_name
         }
         axios.post(connect_string + 'get-product', data).then(res => {
-            const arr = Object.values(res.data).slice(0, -1).map((item: any, index) => ({
+            const arr = Object.values(res.data).slice(0, -1).map((item, index) => ({
                 id: index + 1,
                 productName: item.product_name,
                 price: item.product_price,
@@ -273,7 +273,7 @@ function ModalCreate({ isModalOpen, handleOk, handleCancel, form, handleCreatePr
                         style={{ width: '100%' }}
                         min={0}
                         formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                        parser={(value) => value!.replace(/\./g, '')}
+                        parser={(value) => value.replace(/\./g, '')}
                     />
                 </Form.Item>
             </Form>
@@ -342,7 +342,7 @@ function ModalEdit({ isModalOpen, handleOk, handleCancel, form, handleCreateProd
                         style={{ width: '100%' }}
                         min={0}
                         formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
-                        parser={(value) => value!.replace(/\./g, '')}
+                        parser={(value) => value.replace(/\./g, '')}
                     />
                 </Form.Item>
             </Form>
