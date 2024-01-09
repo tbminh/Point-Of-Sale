@@ -30,6 +30,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/get-user-detail/{id}',[AdminController::class,'get_user_detail']);
     Route::post('/add-user',[AdminController::class,'add_user']);
     Route::post('/update-user/{id}',[AdminController::class,'update_user']);
+    Route::post('/update-password/{id}',[AdminController::class,'update_password']);
     Route::post('/delete-user/{id}',[AdminController::class,'delete_user']);
     Route::post('/logout', [UserController::class, 'logout']);
     #endregion
@@ -49,10 +50,13 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/delete-table/{id}',[AdminController::class,'delete_table']);
     #endregion
     #region Order
-    Route::post('/get-table-order',[OrderController::class,'get_table_order']);
-    Route::post('/get-order-detail',[OrderController::class,'get_order_detail']);
+    Route::get('/get-table-order',[OrderController::class,'get_table_order']);
+    Route::post('/get-product-order',[OrderController::class,'get_product_order']);
+    Route::post('/get-order-detail/{id}',[OrderController::class,'get_order_detail']);
+    Route::post('/create-order',[OrderController::class,'create_order']);
     Route::post('/add-meal',[OrderController::class,'add_meal']);
     Route::post('/update-meal/{id}',[OrderController::class,'update_meal']);
-    Route::post('/delete-meal/{id}',[OrderController::class,'delete_table']);
+    Route::post('/delete-meal/{id}',[OrderController::class,'delete_meal']);
+    Route::post('/delete-table-order/{id}',[OrderController::class,'delete_table_order']);
     #endregion
 });

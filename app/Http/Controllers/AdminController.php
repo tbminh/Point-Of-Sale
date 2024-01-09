@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Validator;
 
 class  AdminController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
     #region User
     public function get_user()
     {
@@ -44,11 +48,19 @@ class  AdminController extends Controller
         User::where('id', $id)->update([
             'role' => $request->role,
             'full_name' => $request->full_name,
-            'user_name' => $request->user_name,
-            'password' => Hash::make($request->password),
             'phone' => $request->phone,
         ]);
         return response()->json(['message' => 'Success'], 200);
+    }
+    public function update_password($id, Request $request)
+    {
+        $user = User::find($id);
+        if (Hash::check($request->old_password, $user->password)) {
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+            return response()->json(['message' => 'Success'], 200);
+        }
+        return response()->json(['message' => 'Mật khẩu cũ không đúng'], 400);
     }
     public function delete_user($id)
     {
