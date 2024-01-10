@@ -55,8 +55,9 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/get-order-detail/{id}',[OrderController::class,'get_order_detail']);
     Route::post('/create-order',[OrderController::class,'create_order']);
     Route::post('/add-meal',[OrderController::class,'add_meal']);
-    Route::post('/update-meal/{id}',[OrderController::class,'update_meal']);
-    Route::post('/delete-meal/{id}',[OrderController::class,'delete_meal']);
-    Route::post('/delete-table-order/{id}',[OrderController::class,'delete_table_order']);
+    Route::post('/update-meal',[OrderController::class,'update_meal']);
+    Route::post('/checkout',[OrderController::class,'checkout']);
+    Route::post('/delete-meal',[OrderController::class,'delete_meal']);
+    Route::post('/delete-table-order',[OrderController::class,'delete_table_order']);
     #endregion
 });
