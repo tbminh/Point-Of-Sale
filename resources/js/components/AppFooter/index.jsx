@@ -14,19 +14,19 @@ const AppFooter = () => {
                 onClick={(item) => {
                     navigate(item.key)
                 }}
-                defaultSelectedKeys={['/']}
+                defaultSelectedKeys={['/tables-order']}
                 style={{ fontSize: '13px', fontWeight: '500', color: 'white', background: '#3D4B64' }}
                 // mode='inline'
                 items={[
                     {
                         label: "",
                         icon: <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}> <AppstoreOutlined /> Home</div>,
-                        key: '/'
+                        key: '/tables-order'
                     },
                     {
                         label: "",
                         icon: <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}> <FaBowlFood /> Món</div>,
-                        key: '/admin/products'
+                        key: '/products-order'
                     },
                     {
                         label: "",
