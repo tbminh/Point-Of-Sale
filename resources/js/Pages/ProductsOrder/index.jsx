@@ -1,47 +1,38 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, Space, Typography, List, Modal, Input, Button, Divider } from 'antd';
 import { PlusOutlined, MinusOutlined, SearchOutlined } from "@ant-design/icons"
 import './styles.scss'
+import axios from 'axios';
+import { connect_string } from "../../Api";
 const ProductsOrder = () => {
     const imgProducts = "../../../../images/pho.jpg"
-    const data = [
-        {
-            key: 1
-        },
-        {
-            key: 2
-        },
-        {
-            key: 4
-        },
-        {
-            key: 5
-        },
-        {
-            key: 6
-        },
-        {
-            key: 7
-        },
-        {
-            key: 8
-        },
-        {
-            key: 9
-        },
-        {
-            key: 10
-        },
-        {
-            key: 11
-        },
+    const [dataSource, setDataSource] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [dataListOrder, setDataListOrder] = useState([])
+    useEffect(() => {
+        getAllProduct()
+    }, [])
 
+    const getAllProduct = () => {
+        setLoading(true)
+        const url = connect_string + "get-product-order"
+        // const data ={
+        //     product_name: ""
+        // }
+        axios.post(url).then(res => {
+            setDataSource(res.data)
+        }).finally(() => {
+            setLoading(false)
+        })
+    }
 
-    ]
-    
+    const addToOrders = (value) => {
+        setDataListOrder( item => item + value)
+    }
     return (
         <div className="productsOrder">
             <List
+                loading={loading}
                 grid={{
                     gutter: 20,
                     xs: 2,
@@ -51,21 +42,34 @@ const ProductsOrder = () => {
                     xl: 6,
                     xxl: 8,
                 }}
-                dataSource={data}
+                dataSource={dataSource}
                 renderItem={(item, index) => (
                     <List.Item style={{ display: 'flex', justifyContent: 'center' }}>
-                        <CardItem src={imgProducts} />
+                        <CardItem src={imgProducts} data={item} onClick={addToOrders} />
                     </List.Item>
                 )}
             >
             </List>
+            <div className='listOrder' >
+                <Typography.Text
+                    ellipsis={true}
+                    style={{ fontSize: '17px', fontWeight: 500, color: 'white' }}
+                >
+                    Danh sách order
+                </Typography.Text>
+                <Typography.Text
+                    ellipsis={true}
+                    style={{ fontSize: '17px', fontWeight: 500, color: 'white' }}
+                >
+                    100.000 đ
+                </Typography.Text>
+            </div>
         </div>
     )
 }
 
-
-const CardItem = ({ src }) => {
-    const [quantity, setQuantity] = useState(1); // State lưu giữ giá trị của input
+const CardItem = ({ src, data, onClick }) => {
+    const [quantity, setQuantity] = useState(1);
 
     const increaseQuantity = () => {
         setQuantity(quantity + 1);
@@ -99,7 +103,7 @@ const CardItem = ({ src }) => {
                                 ellipsis={true}
                                 style={{ fontSize: '15px', fontWeight: 500, color: 'black' }}
                             >
-                                {"Phở Chó"}
+                                {data.product_name}
 
                             </Typography.Text>
                         </>
@@ -115,7 +119,7 @@ const CardItem = ({ src }) => {
                             style={{ height: 'max-content', display: 'flex', flexDirection: 'column' }}>
                             <Typography.Text style={{ fontSize: '17px', fontWeight: 'bold' }}>
                                 {
-                                    Number(500000).toLocaleString('vi-VN', {
+                                    Number(data.product_price).toLocaleString('vi-VN', {
                                         style: 'currency',
                                         currency: 'VND',
                                     })
@@ -149,7 +153,16 @@ const CardItem = ({ src }) => {
                                     style={{ color: 'black', }}
                                     icon={<MinusOutlined />} />
                             </div>
-                            <Typography style={{ textAlign: 'right', fontSize: '18px', fontWeight: 'bold', color: '#522103' }}>Thêm</Typography>
+                            <Typography
+                                onClick={() => onClick(data)}
+                                style={{
+                                    textAlign: 'right',
+                                    fontSize: '18px',
+                                    fontWeight: 'bold',
+                                    color: '#522103'
+                                }}>
+                                Thêm
+                            </Typography>
                         </Typography.Paragraph>
                     }
                 >
@@ -159,6 +172,7 @@ const CardItem = ({ src }) => {
         </>
     )
 }
+
 
 
 export default ProductsOrder

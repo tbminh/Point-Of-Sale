@@ -1,10 +1,10 @@
 import { Menu } from 'antd';
 import React, { useState } from 'react';
 import { AppstoreOutlined, UserOutlined, BellOutlined } from "@ant-design/icons"
-import { FaBowlFood  } from "react-icons/fa6";
+import { FaBowlFood } from "react-icons/fa6";
 import { useNavigate } from 'react-router-dom';
 
-const AppFooter = () => {
+const AppFooter = ({total}) => {
     const navigate = useNavigate()
 
     return (
@@ -44,5 +44,12 @@ const AppFooter = () => {
         </div>
     )
 }
+// export const ProductsOrderFooter = ({ total }) => {
+//     return (
+//         <div>
+//             {total}
+//         </div>
+//     )
+// }
 
 export default AppFooter
