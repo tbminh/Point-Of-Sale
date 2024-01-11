@@ -7,23 +7,26 @@ import { connect_string } from '../../Api';
 import { useNavigate } from "react-router-dom"
 const LoginPage = () => {
     const navigate = useNavigate()
+    const [loading, setLoading] = useState(false)
 
     const handleLogin = async (values) => {
-       try {
-        const response = await axios.post(connect_string + 'login', {
-            user_name: values.myUserName,
-            password: values.myPassword,
-        });
-        const userData = response.data.user;
-        sessionStorage.setItem('user_data', JSON.stringify(userData));
+        setLoading(true)
+        try {
+            const response = await axios.post(connect_string + 'login', {
+                user_name: values.myUserName,
+                password: values.myPassword,
+            });
+            const userData = response.data.user;
+            sessionStorage.setItem('user_data', JSON.stringify(userData));
 
-        //console.log('Đăng nhập thành công', response.data);
-        document.cookie = `token=${response.data.authorization.token}; path=/;`;
-    } catch (error) {
-        // Xử lý lỗi khi có
-    } finally {
-        navigate('/tables-order');
-    }
+            //console.log('Đăng nhập thành công', response.data);
+            document.cookie = `token=${response.data.authorization.token}; path=/;`;
+        } catch (error) {
+            // Xử lý lỗi khi có
+        } finally {
+            setLoading(false)
+            navigate('/tables-order');
+        }
     }
 
     return (
@@ -40,7 +43,7 @@ const LoginPage = () => {
                 <Form.Item label="Password" name={"myPassword"}>
                     <Input.Password placeholder="Enter your password"></Input.Password>
                 </Form.Item>
-                <Button type="primary" htmlType="submit" block>
+                <Button type="primary" htmlType="submit" block loading={loading}>
                     Gửi
                 </Button>
                 <Divider style={{ borderColor: "black" }}>Login with</Divider>

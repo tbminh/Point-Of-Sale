@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import './styles.scss'
 import { connect_string } from '../../Api';
 import axios from 'axios';
+import { useNavigate } from "react-router-dom"
+
 const TablesOrder = () => {
     const imgOrder = "../../../../images/dinner-table.png"
     const imgNoOrder = "../../../../images/table.png"
@@ -48,32 +50,18 @@ const TablesOrder = () => {
                     </List.Item>
                 )}
             >
-
             </List>
-
         </div>
     )
 }
 
 const CardItem = ({ src, title, data }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleOk = () => {
-        setIsModalOpen(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
+    const navigate = useNavigate()
 
     return (
         <>
             <Card
-                onClick={showModal}
+                onClick={() => navigate("/products-order", { state: data })}
                 hoverable
                 style={{
                     // background: data.data.table_status === 1 ? 'RED' : 'green',
@@ -103,18 +91,7 @@ const CardItem = ({ src, title, data }) => {
                 </Card.Meta>
 
             </Card>
-            <ModalOrder open={isModalOpen} onOk={handleOk} onCancel={handleCancel} />
         </>
-    )
-}
-
-const ModalOrder = ({ open, onOk, onCancel }) => {
-    return (
-        <Modal title="Basic Modal" open={open} onOk={onOk} onCancel={onCancel}>
-            <p>Some contents...</p>
-            <p>Some contents...</p>
-            <p>Some contents...</p>
-        </Modal>
     )
 }
 

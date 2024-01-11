@@ -9,7 +9,7 @@
     background: #643006;
     position: absolute;
     bottom: 51px;
-    border-radius: 20px;
+    border-radius: 15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -20,5 +20,15 @@
 @media (min-width: 650px) {
     .listOrder {
         display: none;
+    }
+}
+
+.input-container{
+    .ant-input-number{
+        .ant-input-number-input-wrap{
+            input{
+                font-weight: bolder;
+            }
+        }
     }
 }
