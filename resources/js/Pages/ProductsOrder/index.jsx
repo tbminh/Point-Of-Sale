@@ -4,9 +4,11 @@ import { PlusOutlined, MinusOutlined, CloseOutlined } from "@ant-design/icons"
 import './styles.scss'
 import axios from 'axios';
 import { connect_string } from "../../Api";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const ProductsOrder = () => {
+    const navigate = useNavigate()
+
     //#region Variabel
     const imgProducts = "../../../../images/pho.jpg"
     const [dataSource, setDataSource] = useState([])
@@ -49,8 +51,10 @@ const ProductsOrder = () => {
         setIsModalOpen(true);
     };
 
-    const handleOk = () => {
+    const handleOk = (value) => {
+        console.log(value)
         setIsModalOpen(false);
+        navigate("/tables-order")
     };
 
     const handleCancel = () => {
@@ -239,9 +243,12 @@ const ProductsOrder = () => {
 const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
     const locate = useLocation()
     const tableDetail = locate.state
-
     const [productList, setProductList] = useState([]);
+    const [note, setNote] = useState('')
 
+    const handleChangeNote = (event) =>{
+        setNote(event.target.value)
+    }
     //#region  useEffect + useMeno
     const uniqueProducts = useMemo(() => {
         return data.reduce((accumulator, currentProduct) => {
@@ -278,11 +285,11 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
         total(productList.reduce((sum, product) => sum + product.total_price, 0))
     }, [productList]);
 
-    useEffect(() => {
-        if(tableDetail.data.table_status === 0){
-            console.log(tableDetail)
-        }
-    }, []);
+    // useEffect(() => {
+    //     if(tableDetail?.data?.table_status === 0){
+    //         //console.log(tableDetail)
+    //     }
+    // }, []);
     //#endregion
 
     //#region onChange
@@ -303,8 +310,9 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
         );
     }
 
+
     return (
-        <Modal title={tableDetail.title} open={open} onOk={onOk} onCancel={onCancel}>
+        <Modal title={tableDetail ? tableDetail.title: ""} open={open} onOk={() => onOk({table_id:tableDetail.id, data_order:productList, note: note})} onCancel={onCancel}>
             <List
                 className="demo-loadmore-list"
                 itemLayout="horizontal"
@@ -332,7 +340,7 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
                     </List.Item>
                 )}
             />
-            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} />
+            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} value={note} onChange={handleChangeNote}/>
         </Modal>
     );
 };
