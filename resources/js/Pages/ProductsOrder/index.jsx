@@ -52,7 +52,6 @@ const ProductsOrder = () => {
     };
 
     const handleOk = (value) => {
-        console.log(value)
         setIsModalOpen(false);
         navigate("/tables-order")
     };

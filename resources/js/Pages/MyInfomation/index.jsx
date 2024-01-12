@@ -1,88 +1,168 @@
-import { Button, Image, Form, Input, Space, Typography } from "antd"
-import { EditOutlined } from '@ant-design/icons';
+import { Button, Image, Form, Input, Space, Typography, message, Modal } from "antd"
+import { EditOutlined, ReloadOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from "react"
 import './styles.scss'
 import { connect_string, userData } from "../../Api";
+import axios from "axios";
 const MyInfomation = () => {
-    const [data, setData] = useState(null)
+    const [key, setKey] = useState(null)
+    const [fullName, setFullName] = useState('')
+    const [phone, setPhone] = useState('')
+    const [userName, setUserName] = useState('')
+    const [role, setRole] = useState('')
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [form] = Form.useForm();
+
     useEffect(() => {
         if (userData) {
-            const url = connect_string + 'get-user-detail/' + userData.id;
-            axios.get(url).then(res => {
-                const fetchedData = res.data[0];
-                setData({
-                    myKey: fetchedData.id || '',
-                    myFullName: fetchedData.full_name || '',
-                    myPhone: fetchedData.phone || '',
-                    myUserName: fetchedData.user_name || '',
-                });
-
-            });
+            handleGetDetailUser()
         }
     }, [])
 
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
 
+    const handleOk = () => {
+        form.submit();
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleGetDetailUser = () => {
+        const url = connect_string + 'get-user-detail/' + userData.id;
+        axios.get(url).then(res => {
+            const fetchedData = res.data[0];
+            setKey(fetchedData.id)
+            setFullName(fetchedData.full_name)
+            setPhone(fetchedData.phone)
+            setUserName(fetchedData.user_name)
+            setRole(fetchedData.role)
+        });
+    }
+
+    const handleFullNameChange = (event) => {
+        setFullName(event.target.value)
+    }
+    const handlePhoneChange = (event) => {
+        setPhone(event.target.value)
+    }
+
+    const handleEditDetail = () => {
+        const url = connect_string + "update-user/" + key
+        const data = {
+            full_name: fullName,
+            phone: phone,
+            role: role
+        }
+        axios.post(url, data).then(res => {
+            if (res.data) {
+                handleGetDetailUser()
+                message.success("Cập nhật thành công")
+            }
+        }).catch(() => {
+            message.error("Cập nhật thất bại")
+        })
+    }
+
+    const checkPassword = (_, value) => {
+        const newPassword = form.getFieldValue('newPassword');
+        if (value && newPassword && value !== newPassword) {
+            return Promise.reject(new Error('Mật khẩu mới và Nhập lại mật khẩu mới không khớp!'));
+        } else {
+            return Promise.resolve();
+        }
+    };
+
+    const handleChangePassword = (value) => {
+        const url = connect_string +'update-password/'+key
+        const data = {
+            old_password: value.oldPassword,
+            new_password: value.newPassword
+        }
+        axios.post(url,data).then(res =>{
+            message.success("Cập nhật thành công")
+            sessionStorage.removeItem('user_data');
+            setIsModalOpen(false)
+        }).catch(() => {
+            message.error("Mật khẩu cũ không đúng")
+        })
+      
+    };
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '100%', }}>
             <Typography.Title style={{ fontSize: '30px' }}>Thông tin người dùng</Typography.Title>
             <div className="Info">
-                <div className="bgimg">
-                </div>
+                <div className="bgimg"></div>
+                <Space direction="vertical" size="middle" style={{ display: 'flex' }}>
+                    <Input type="hidden" value={key} />
+                    <Typography.Text style={{ fontWeight: 'bold' }}>Tên người dùng</Typography.Text>
+                    <Input placeholder='Nhập tên người dùng' value={fullName} onChange={handleFullNameChange} />
+                    <Typography.Text style={{ fontWeight: 'bold' }}>Số điện thoại</Typography.Text>
+                    <Input addonBefore="+84" placeholder='Nhập số điện thoại' value={phone} onChange={handlePhoneChange} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 30 }}>
+                        <Button type="primary" icon={<EditOutlined />} onClick={handleEditDetail}>Cập nhật</Button>
+                        <Button type="primary" ghost icon={<ReloadOutlined />} onClick={() => showModal()}>Đổi mật khẩu</Button>
+                    </div>
+                </Space>
+            </div>
+            <div></div>
+            <Modal title="Đổi mật khẩu" open={isModalOpen} onOk={handleOk} onCancel={ handleCancel}>
                 <Form
-                    name="basic"
                     labelCol={{ span: 8 }}
                     wrapperCol={{ span: 16 }}
-                    style={{ maxWidth: '700px', width: '70%' }}
-                    initialValues={data|| {}}
+                    form={form}
                     autoComplete="off"
-                    className='createForm'
-                // onFinish={handleCreateProduct}
+                    initialValues={{ remember: true }}
+                    onFinish={handleChangePassword}
                 >
                     <Form.Item
-                        name="myKey"
-                        noStyle
-                    >
-                        <Input type="hidden" />
-                    </Form.Item>
-                    <Form.Item
-                        label='Tên người dùng: '
-                        name={'myFullName'}
+                        label="Mật khẩu cũ"
+                        name={"oldPassword"}
                         rules={[
                             {
                                 required: true,
                                 type: "string",
-                                message: "Vui lòng nhập tên người dùng"
+                                message: "Vui lòng nhập mật khẩu cũ"
                             }
                         ]}>
-                        <Input placeholder='Nhập tên người dùng' />
+                        <Input.Password placeholder="Nhập mật khẩu cũ" />
                     </Form.Item>
                     <Form.Item
-                        label='SĐT: '
-                        name={'myPhone'}
+                        label="Mật khẩu mới"
+                        name={"newPassword"}
                         rules={[
                             {
                                 required: true,
                                 type: "string",
-                                message: "Vui lòng nhập số điện thoại"
+                                message: "Vui lòng nhập mật khẩu mới"
                             }
                         ]}>
-                        <Input addonBefore="+84" placeholder='Nhập số điện thoại' />
+                        <Input.Password placeholder="Nhập mật khẩu mới" />
                     </Form.Item>
                     <Form.Item
-                        label='Tài khoản: '
-                        name={'myUserName'}
+                        label="Nhập lại mật khẩu mới"
+                        name={"confirmNewPassword"}
+                        dependencies={['newPassword']}
                         rules={[
                             {
                                 required: true,
                                 type: "string",
-                                message: "Vui lòng nhập tài khoản"
-                            }
+                                message: "Vui lòng nhập lại mật khẩu mới"
+                            },
+                            {
+                                validator: checkPassword,
+                            },
                         ]}>
-                        <Input placeholder='Nhập tài khoản' />
+                        <Input.Password placeholder="Nhập lại mật khẩu mới" />
                     </Form.Item>
                 </Form>
-            </div>
+            </Modal>
         </div>
     )
 }
+
+
 export default MyInfomation
