@@ -20,9 +20,10 @@ class OrderController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
-    public function get_order_detail($id)
+    public function get_order_detail($table_id)
     {
-        $data = OrderDetail::where('order_id', $id)->get();
+        $orderId = Order::where('table_id', $table_id)->max('id');
+        $data = OrderDetail::where('order_id', $orderId)->get();
         return response()->json($data);
     }
     public function get_table_order()
@@ -97,10 +98,11 @@ class OrderController extends Controller
                 ]);
             } 
             else {
+                $get_detail = OrderDetail::where('id', $detail->id)->first();
                 $order_detail = OrderDetail::where('id', $detail->id)->update([
                     'unit_price' => $productPrice,
-                    'quantity' => $quantity,
-                    'price' => $totalPrice,
+                    'quantity' => $get_detail->quantity + $quantity,
+                    'price' => $get_detail->price +  $totalPrice,
                     'product_status' => 0,
                     'user_id' => $user_id,
                 ]);
@@ -110,6 +112,7 @@ class OrderController extends Controller
         $this->updateTotalPrice($orderId);
         //Update Order
         Order::where('id',$orderId)->update(['note'=>$note]);
+        Table::where('id',$tableId)->update(['table_status'=>1]);
         return response()->json($order_detail, 200);
     }
     public function update_meal(Request $request)
