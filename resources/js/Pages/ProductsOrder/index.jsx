@@ -19,6 +19,7 @@ const ProductsOrder = () => {
     const [quantity, setQuantity] = useState(1);
     const [quantityDict, setQuantityDict] = useState({});
     const [total, setTotal] = useState(0)
+    const userData = JSON.parse(sessionStorage.getItem('user_data'))
 
     const increaseQuantity = (itemId) => {
         setQuantityDict((prevDict) => ({
@@ -52,8 +53,27 @@ const ProductsOrder = () => {
     };
 
     const handleOk = (value) => {
-        setIsModalOpen(false);
-        navigate("/tables-order")
+        const data_order = value.data_order.map((item, index) => ({
+            id: item.id,
+            unit_price: item.product_price,
+            quantity: item.quantity,
+            total_price: item.total_price
+        }))
+        const data = {
+            data_order: data_order,
+            note: value.note,
+            table_id: value.table_id,
+            user_id: userData.id
+        }
+        const url = connect_string + "add-meal"
+        axios.post(url, data).then(res => {
+            message.success("Order thành công")
+            setIsModalOpen(false);
+            navigate("/tables-order")
+        }).catch(() => {
+            message.error("Order thất bại")
+        })
+
     };
 
     const handleCancel = () => {
@@ -245,7 +265,7 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
     const [productList, setProductList] = useState([]);
     const [note, setNote] = useState('')
 
-    const handleChangeNote = (event) =>{
+    const handleChangeNote = (event) => {
         setNote(event.target.value)
     }
     //#region  useEffect + useMeno
@@ -311,35 +331,64 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
 
 
     return (
-        <Modal title={tableDetail ? tableDetail.title: ""} open={open} onOk={() => onOk({table_id:tableDetail.id, data_order:productList, note: note})} onCancel={onCancel}>
+        <Modal title={tableDetail ? tableDetail.title : ""} open={open} onOk={() => onOk({ table_id: tableDetail.id, data_order: productList, note: note })} onCancel={onCancel}>
             <List
                 className="demo-loadmore-list"
                 itemLayout="horizontal"
                 dataSource={productList}
+                style={{ width: '100%' }}
                 renderItem={(item) => (
-                    <List.Item key={item.id} >
-                        <Typography.Text mark>{item.product_name}</Typography.Text>
-                        <InputNumber
-                            style={{ width: '50px' }}
-                            value={item.quantity}
-                            min={1}
-                            onChange={(value) => onChangeQuantity(value, item)}
-                        />
-                        <Typography.Text mark>
-                            {
-                                Number(item.total_price
-                                ).toLocaleString('vi-VN', {
-                                    style: 'currency',
-                                    currency: 'VND',
-                                })
+                    <List.Item key={item.id} style={{ width: '100%' }}>
+                        <List.Item.Meta
+                            title={
+                                <Typography.Text mark>{item.product_name}</Typography.Text>
                             }
-                        </Typography.Text>
-                        <Button onClick={() => deleteItem(item)} size='small' type="primary" shape="circle" icon={<CloseOutlined />} />
-                        <Divider style={{ background: '#643006' }} />
+                            description={
+                                <div style={{display:'flex', flexDirection:'row', flexWrap:'wrap', justifyContent:'space-around'}}>
+                                    <InputNumber
+                                        style={{ width: '50px' }}
+                                        value={item.quantity}
+                                        min={1}
+                                        onChange={(value) => onChangeQuantity(value, item)}
+                                    />
+                                    <Typography.Text mark>
+                                        {
+                                            Number(item.total_price
+                                            ).toLocaleString('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND',
+                                            })
+                                        }
+                                    </Typography.Text>
+                                    <Button onClick={() => deleteItem(item)} size='small' type="primary" shape="circle" icon={<CloseOutlined />} />
+                                    <Divider style={{ background: '#643006' }} />
+                                </div>
+                            }
+                        />
+                        {/* <div style={{ width: '100%' }}>
+                            <Typography.Text mark>{item.product_name}</Typography.Text>
+                            <InputNumber
+                                style={{ width: '50px' }}
+                                value={item.quantity}
+                                min={1}
+                                onChange={(value) => onChangeQuantity(value, item)}
+                            />
+                            <Typography.Text mark>
+                                {
+                                    Number(item.total_price
+                                    ).toLocaleString('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                    })
+                                }
+                            </Typography.Text>
+                            <Button onClick={() => deleteItem(item)} size='small' type="primary" shape="circle" icon={<CloseOutlined />} />
+                            <Divider style={{ background: '#643006' }} />
+                        </div> */}
                     </List.Item>
                 )}
             />
-            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} value={note} onChange={handleChangeNote}/>
+            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} value={note} onChange={handleChangeNote} />
         </Modal>
     );
 };

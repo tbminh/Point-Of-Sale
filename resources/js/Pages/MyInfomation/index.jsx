@@ -2,7 +2,7 @@ import { Button, Image, Form, Input, Space, Typography, message, Modal } from "a
 import { EditOutlined, ReloadOutlined } from '@ant-design/icons';
 import React, { useEffect, useState } from "react"
 import './styles.scss'
-import { connect_string, userData } from "../../Api";
+import { connect_string } from "../../Api";
 import axios from "axios";
 const MyInfomation = () => {
     const [key, setKey] = useState(null)
@@ -12,11 +12,9 @@ const MyInfomation = () => {
     const [role, setRole] = useState('')
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [form] = Form.useForm();
-
+    const userData = JSON.parse(sessionStorage.getItem('user_data'))
     useEffect(() => {
-        if (userData) {
-            handleGetDetailUser()
-        }
+        handleGetDetailUser()
     }, [])
 
     const showModal = () => {
@@ -77,19 +75,19 @@ const MyInfomation = () => {
     };
 
     const handleChangePassword = (value) => {
-        const url = connect_string +'update-password/'+key
+        const url = connect_string + 'update-password/' + key
         const data = {
             old_password: value.oldPassword,
             new_password: value.newPassword
         }
-        axios.post(url,data).then(res =>{
+        axios.post(url, data).then(res => {
             message.success("Cập nhật thành công")
             sessionStorage.removeItem('user_data');
             setIsModalOpen(false)
         }).catch(() => {
             message.error("Mật khẩu cũ không đúng")
         })
-      
+
     };
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', height: '100%', }}>
@@ -109,7 +107,7 @@ const MyInfomation = () => {
                 </Space>
             </div>
             <div></div>
-            <Modal title="Đổi mật khẩu" open={isModalOpen} onOk={handleOk} onCancel={ handleCancel}>
+            <Modal title="Đổi mật khẩu" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Form
                     labelCol={{ span: 8 }}
                     wrapperCol={{ span: 16 }}
