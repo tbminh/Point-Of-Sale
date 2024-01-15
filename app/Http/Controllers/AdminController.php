@@ -52,9 +52,9 @@ class  AdminController extends Controller
         ]);
         return response()->json(['message' => 'Success'], 200);
     }
-    public function update_password($id, Request $request)
+    public function update_password(Request $request)
     {
-        $user = User::find($id);
+        $user = User::find($request->user_id);
         if (Hash::check($request->old_password, $user->password)) {
             $user->password = Hash::make($request->new_password);
             $user->save();

@@ -69,34 +69,47 @@ class OrderController extends Controller
     }
     public function add_meal(Request $request)
     {
-        //Check exists order before
-        $orderId = Order::where('table_id', $request->table_id)->max('id');
-        //Check exists order detail
-        $detail = OrderDetail::where('product_id', $request->product_id)
-                ->where('order_id', $orderId)
-                ->first();
-        if ($detail == null) {
-            $order_detail = OrderDetail::create([
-                'order_id' => $orderId,
-                'product_id' => $request->product_id,
-                'unit_price' => $request->unit_price,
-                'quantity' => $request->quantity,
-                'price' => $request->unit_price * $request->quantity,
-                'product_status' => 0,
-                'user_id' => $request->user_id,
-            ]);
-        } 
-        else {
-            $order_detail = OrderDetail::where('id', $detail->id)->update([
-                'unit_price' => $request->unit_price,
-                'quantity' => $request->quantity,
-                'price' => $request->unit_price * $request->quantity,
-                'product_status' => 0,
-                'user_id' => $request->user_id,
-            ]);
+        $tableId = $request->input('table_id');
+        $note = $request->input('note');
+        $user_id = $request->input('user_id');
+        $dataOrder = $request->input('data_order');
+        $orderId = Order::where('table_id', $tableId)->max('id');
+
+        foreach ($dataOrder as $item) {
+            $id = $item['id'];
+            $productPrice = $item['unit_price'];
+            $quantity = $item['quantity'];
+            $totalPrice = $item['total_price'];
+
+            //Check exists order detail
+            $detail = OrderDetail::where('product_id', $id)
+                    ->where('order_id', $orderId)
+                    ->first();
+            if ($detail == null) {
+                $order_detail = OrderDetail::create([
+                    'order_id' => $orderId,
+                    'product_id' => $id,
+                    'unit_price' => $productPrice,
+                    'quantity' => $quantity,
+                    'price' => $totalPrice,
+                    'product_status' => 0,
+                    'user_id' => $user_id
+                ]);
+            } 
+            else {
+                $order_detail = OrderDetail::where('id', $detail->id)->update([
+                    'unit_price' => $productPrice,
+                    'quantity' => $quantity,
+                    'price' => $totalPrice,
+                    'product_status' => 0,
+                    'user_id' => $user_id,
+                ]);
+            }
         }
         //Update total_price of OrderDetail
         $this->updateTotalPrice($orderId);
+        //Update Order
+        Order::where('id',$orderId)->update(['note'=>$note]);
         return response()->json($order_detail, 200);
     }
     public function update_meal(Request $request)

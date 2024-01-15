@@ -30,7 +30,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/get-user-detail/{id}',[AdminController::class,'get_user_detail']);
     Route::post('/add-user',[AdminController::class,'add_user']);
     Route::post('/update-user/{id}',[AdminController::class,'update_user']);
-    Route::post('/update-password/{id}',[AdminController::class,'update_password']);
+    Route::post('/update-password',[AdminController::class,'update_password']);
     Route::post('/delete-user/{id}',[AdminController::class,'delete_user']);
     Route::post('/logout', [UserController::class, 'logout']);
     #endregion
