@@ -23,7 +23,7 @@ class OrderController extends Controller
     public function get_order_detail($table_id)
     {
         $order = Order::where('table_id', $table_id)
-              ->select('id', 'note')
+              ->select('id', DB::raw('COALESCE(note, "") as note'))
               ->orderBy('id', 'desc')
               ->first();
         $data = OrderDetail::join('products as P', 'order_details.product_id', '=', 'P.id')
