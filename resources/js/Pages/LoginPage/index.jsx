@@ -37,10 +37,10 @@ const LoginPage = () => {
                 className="loginForm"
                 onFinish={handleLogin}>
                 <Typography.Title>Đăng Nhập</Typography.Title>
-                <Form.Item label="UserName" name={"myUserName"}>
+                <Form.Item label="Tài khoản" name={"myUserName"}>
                     <Input placeholder="Enter your name"></Input>
                 </Form.Item>
-                <Form.Item label="Password" name={"myPassword"}>
+                <Form.Item label="Mật khẩu" name={"myPassword"}>
                     <Input.Password placeholder="Enter your password"></Input.Password>
                 </Form.Item>
                 <Button type="primary" htmlType="submit" block loading={loading}>

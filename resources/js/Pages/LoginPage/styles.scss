@@ -1,4 +1,4 @@
-.appBg{
+.appBg {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -6,16 +6,25 @@
     height: 100vh;
     background-size: cover !important;
     background-repeat: no-repeat;
-    background: url('pho-background.jpg');
+    background: url('bg.jpg');
 }
-.loginForm{
-    background-color: rgba(255,255,255,0.33);
-    box-shadow: 0px 8px 32px 0 rgba(0,0,255,0.33);
-    backdrop-filter: blur(3px);
-    padding: 0px 16px 16px 16px;
+
+@media (max-width:510px) {
+    .appBg {
+        background: url('Instant\ Pot\ Pho\ \(Beef\ Pho\ Recipe\).jpg');
+    }
+}
+
+.loginForm {
+    background-color: rgba(243, 215, 202, 0.7);
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset;
+    //box-shadow: 0px 8px 32px 0 rgba(0,0,255,0.33);
+    //backdrop-filter: blur(3px);
+    padding: 16px 32px 32px 32px;
     border-radius: 16px;
 }
-.socialLogin{
+
+.socialLogin {
     display: flex;
     justify-content: center;
     gap: 24px;
