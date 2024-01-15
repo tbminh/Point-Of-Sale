@@ -61,7 +61,7 @@ const CardItem = ({ src, title, data }) => {
     const navigate = useNavigate()
     const userData = JSON.parse(sessionStorage.getItem('user_data'))
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [listOrderDetail, setListOrderDetail] = useState([])
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -88,8 +88,16 @@ const CardItem = ({ src, title, data }) => {
         })
     };
 
+    const getOrderDetail = () => {
+        const url = connect_string + "get-order-detail/" + data.id
+        axios.get(url).then(res => {
+            setListOrderDetail(res.data)
+        })
+    }
+
     const handleOrder = () => {
         if (data.data.table_status === 1) {
+            getOrderDetail()
             showModal()
         }
 
@@ -172,17 +180,46 @@ const CardItem = ({ src, title, data }) => {
                         </Card.Meta>
                     </Card>
             }
-            <ModalTableOrderDetail open={isModalOpen} onOk={handleOk} onCancel={handleCancel} tableName={data.data.table_name} />
+            <ModalTableOrderDetail open={isModalOpen} onOk={handleOk} onCancel={handleCancel} tableName={data.data.table_name} listOrderDetail={listOrderDetail} />
         </>
     )
 }
 
-const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName }) => {
+const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetail }) => {
+    const [quantityDict, setQuantityDict] = useState({});
+    const increaseQuantity = (itemId) => {
+        setQuantityDict((prevDict) => ({
+            ...prevDict,
+            [itemId]: (prevDict[itemId] || 0) + 1,
+        }));
+    };
+
+    const decreaseQuantity = (itemId) => {
+        if (quantityDict[itemId] > 1) {
+            setQuantityDict((prevDict) => ({
+                ...prevDict,
+                [itemId]: prevDict[itemId] - 1,
+            }));
+        }
+    };
+
+    const initializeQuantityDict = () => {
+        const initialQuantities = {};
+        listOrderDetail.forEach((item) => {
+            initialQuantities[item.id] = Number(item.quantity) || 0;
+        });
+        setQuantityDict(initialQuantities);
+    };
+
+    useEffect(() => {
+        initializeQuantityDict();
+    }, [listOrderDetail]);
+
 
     return (
         <Modal title={tableName} open={open} onOk={onOk} onCancel={onCancel}>
             <Button
-                style={{ background: '#e07926' }}
+                style={{ background: '#e07926', float: 'inline-end' }}
                 type="primary"
                 icon={<PlusOutlined />}
             //onClick={() => addToOrders(item, quantityDict[item.id] || 1)}
@@ -192,46 +229,60 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName }) => {
             <List
                 className="demo-loadmore-list"
                 itemLayout="horizontal"
-                dataSource={[1, 2]}
+                dataSource={listOrderDetail || []}
                 style={{ width: '100%' }}
                 renderItem={(item) => (
                     <List.Item key={item.id} style={{ width: '100%' }}>
                         <List.Item.Meta
                             title={
-                                <Typography.Text mark>{'item.product_name'}</Typography.Text>
+                                <Typography.Text mark >{'item.product_name'}</Typography.Text>
                             }
                             description={
-                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' }}>
-                                    <div>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    flexWrap: 'wrap',
+                                    justifyContent: 'space-around',
+                                    alignItems: 'center',
+                                    marginTop:'15px'
+                                }}>
+                                    <div className='inputQuantity' style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 10,
+                                        background: 'rgb(61, 75, 100)',
+                                        borderRadius: '15px',
+                                        padding: 1
+                                    }}>
                                         <Button
                                             onClick={() => decreaseQuantity(item.id)}
                                             size='small'
                                             shape='circle'
-                                            style={{ color: 'black', }}
                                             icon={<MinusOutlined />} />
                                         <InputNumber
-                                            style={{ width: '50px' }}
+                                            style={{ width: '50px', background: 'transparent', border: 'none', color: 'white !important' }}
+                                            value={quantityDict[item.id] || Number(item.quantity)}
                                             min={1}
+                                            disabled
                                         />
                                         <Button
                                             onClick={() => increaseQuantity(item.id)}
                                             size='small'
                                             shape='circle'
-                                            style={{ color: 'black', }}
                                             icon={<PlusOutlined />} />
                                     </div>
                                     <Typography.Text mark>
                                         {
-                                            // Number(item.total_price
-                                            // ).toLocaleString('vi-VN', {
-                                            //     style: 'currency',
-                                            //     currency: 'VND',
-                                            // })
-                                            1
+                                            Number(item.price
+                                            ).toLocaleString('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND',
+                                            })
+
                                         }
                                     </Typography.Text>
-                                    <Button onClick={() => deleteItem(item)} size='small' type="primary" shape="circle" icon={<CloseOutlined />} />
-                                    <Divider style={{ background: '#643006' }} />
+                                    <Button onClick={() => deleteItem(item)} size='small' type="primary" danger shape="circle" icon={<CloseOutlined />} />
+                                    <Divider style={{ background: '#643006', marginTop: '10px', marginBottom: '10px' }} />
                                 </div>
                             }
                         />

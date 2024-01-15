@@ -360,7 +360,7 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
                                             })
                                         }
                                     </Typography.Text>
-                                    <Button onClick={() => deleteItem(item)} size='small' type="primary" shape="circle" icon={<CloseOutlined />} />
+                                    <Button onClick={() => deleteItem(item)} size='small' type="primary" shape="circle" danger icon={<CloseOutlined />} />
                                     <Divider style={{ background: '#643006' }} />
                                 </div>
                             }
