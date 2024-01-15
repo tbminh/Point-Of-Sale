@@ -52,7 +52,7 @@ Route::controller(UserController::class)->group(function () {
     #region Order
     Route::get('/get-table-order',[OrderController::class,'get_table_order']);
     Route::post('/get-product-order',[OrderController::class,'get_product_order']);
-    Route::post('/get-order-detail/{id}',[OrderController::class,'get_order_detail']);
+    Route::get('/get-order-detail/{table_id}',[OrderController::class,'get_order_detail']);
     Route::post('/create-order',[OrderController::class,'create_order']);
     Route::post('/add-meal',[OrderController::class,'add_meal']);
     Route::post('/update-meal',[OrderController::class,'update_meal']);
