@@ -22,9 +22,19 @@ class OrderController extends Controller
     }
     public function get_order_detail($table_id)
     {
-        $orderId = Order::where('table_id', $table_id)->max('id');
-        $data = OrderDetail::where('order_id', $orderId)->get();
-        return response()->json($data);
+        $order = Order::where('table_id', $table_id)
+              ->select('id', 'note')
+              ->orderBy('id', 'desc')
+              ->first();
+        $data = OrderDetail::join('products as P', 'order_details.product_id', '=', 'P.id')
+                        ->select('order_details.*', 'P.product_name')
+                        ->where('order_id', $order->id)
+                        ->get();
+        $response = [
+            'data'=>$data,
+            'note'=>$order->note,
+        ];
+        return response()->json($response);
     }
     public function get_table_order()
     {
