@@ -60,5 +60,8 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/checkout',[OrderController::class,'checkout']);
     Route::post('/delete-meal',[OrderController::class,'delete_meal']);
     Route::post('/delete-table-order',[OrderController::class,'delete_table_order']);
+
+    
     #endregion
 });
+Route::post('notify',[OrderController::class,'notify']);

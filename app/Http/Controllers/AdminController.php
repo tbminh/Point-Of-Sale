@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\Order;
 use App\Models\Product;
 use App\Models\Table;
 use App\Models\User;
@@ -183,4 +184,5 @@ class AdminController extends Controller
         return response()->json(['message' => 'Success'], 200);
     }
     #endregion
+    
 }

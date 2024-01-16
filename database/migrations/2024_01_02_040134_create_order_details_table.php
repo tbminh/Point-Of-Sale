@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('product_id');
             $table->string('unit_price');
             $table->string('quantity');
+            $table->smallInteger('quantity_done');
             $table->string('price');
             $table->boolean('product_status');
             $table->integer('user_id');

@@ -9,7 +9,9 @@ use App\Models\Table;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -136,8 +138,6 @@ class OrderController extends Controller
         }
         //Update total_price of OrderDetail
         $this->updateTotalPrice($orderId);
-        //Update Order
-        Order::where('id',$orderId)->update(['note'=>$note]);
         return response()->json($order_detail, 200);
     }
     public function update_meal(Request $request)
@@ -185,4 +185,12 @@ class OrderController extends Controller
         ]);
         return response()->json(['message'=>'Thanh toán thành công'],200);
     }
+
+    public function notify(Request $request)
+    {
+        $message = $request->input('message');
+        $data = ['message' => $message];
+        broadcast(new \App\Events\Order($data));
+        return $request->message;
+    }    
 }
