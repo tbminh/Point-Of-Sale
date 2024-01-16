@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('user_id'); //Người tạo đơn
             $table->string('order_status');
             $table->string('note');
+            $table->string('modify_time');
             $table->datetime('date_order');
         });
     }

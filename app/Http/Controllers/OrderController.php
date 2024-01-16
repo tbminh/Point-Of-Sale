@@ -23,7 +23,7 @@ class OrderController extends Controller
     public function get_order_detail($table_id)
     {
         $order = Order::where('table_id', $table_id)
-              ->select('id', 'note')
+              ->select('id', DB::raw('COALESCE(note, "") as note'),'total_price','surcharge','discount')
               ->orderBy('id', 'desc')
               ->first();
         $data = OrderDetail::join('products as P', 'order_details.product_id', '=', 'P.id')
@@ -32,7 +32,7 @@ class OrderController extends Controller
                         ->get();
         $response = [
             'data'=>$data,
-            'note'=>$order->note,
+            'order'=>$order,
         ];
         return response()->json($response);
     }
@@ -67,14 +67,29 @@ class OrderController extends Controller
                 'user_id' => $request->user_id,
                 'order_status' => 'waiting',
                 'note' => '',
+                'modify_time' => Carbon::now('Asia/Ho_Chi_Minh'),
                 'date_order' => Carbon::now('Asia/Ho_Chi_Minh'),
             ]);
         }
         return response()->json(['message'=>'Thêm thành công'],200);
     }
+    public function update_order(Request $request){
+        $orderId = Order::where('table_id', $request->table_id)->max('id');
+        $order = Order::where('id',$orderId)->update([
+            'surcharge' => $request->surcharge,
+            'discount' => $request->discount,
+            'user_id' => $request->user_id,
+            'note' => $request->note,
+            'modify_time' => Carbon::now('Asia/Ho_Chi_Minh'),
+        ]);
+        $this->updateTotalPrice($orderId);
+        return response()->json($order,200);
+    }
     private function updateTotalPrice($orderId){
-        $total_price = OrderDetail::where('order_id', $orderId)->sum('price');
-        Order::where('id', $orderId)->update([
+        $order = Order::where('id', $orderId)->first();
+        $total_price = OrderDetail::where('order_id', $orderId)->sum('price') + $order->surcharge - $order->discount;
+
+        $order->update([
             'total_price' => $total_price,
         ]);
     }
@@ -106,6 +121,7 @@ class OrderController extends Controller
                     'product_status' => 0,
                     'user_id' => $user_id
                 ]);
+                Table::where('id',$tableId)->update(['table_status'=>1]);
             } 
             else {
                 $get_detail = OrderDetail::where('id', $detail->id)->first();
@@ -122,7 +138,6 @@ class OrderController extends Controller
         $this->updateTotalPrice($orderId);
         //Update Order
         Order::where('id',$orderId)->update(['note'=>$note]);
-        Table::where('id',$tableId)->update(['table_status'=>1]);
         return response()->json($order_detail, 200);
     }
     public function update_meal(Request $request)
@@ -136,12 +151,14 @@ class OrderController extends Controller
         ]);
         $orderID = OrderDetail::select('order_id')->where('id', $request->detail_id);
         $this->updateTotalPrice($orderID);
-        return response()->json(['message'=> 'Success'], 200);
+        return response()->json(['message'=> $order_detail], 200);
     }
     public function delete_meal(Request $request)
     {
         $orderID = OrderDetail::select('order_id')->where('id', $request->id);
-        OrderDetail::where('id', $request->id)->delete();
+        OrderDetail::where('id', $request->id)->update([
+            'product_status'=> 2
+        ]);
         $this->updateTotalPrice($orderID);
         return response()->json(['message' => 'Xóa thành công'], 200);
     }
@@ -159,11 +176,12 @@ class OrderController extends Controller
         return response()->json(['message'=>'success'],200);
     }
     public function checkout(Request $request){
-        Table::where('id',$request->table_id)->update(['table_status'=>0]);
+        Table::where('id',$request->table_id)->update(['table_status' => 0]);
         $orderId = Order::where('table_id', $request->table_id)->max('id');
         Order::where('id',$orderId)->update([
             'user_id' => $request->user_id,
             'order_status' => 'completed',
+            'modify_time'=> Carbon::now('Asia/Ho_Chi_Minh')
         ]);
         return response()->json(['message'=>'Thanh toán thành công'],200);
     }
