@@ -1,5 +1,5 @@
-import { Card, Space, Typography, List, Modal, Popconfirm, message, Input, InputNumber, Button, Divider } from 'antd';
-import { CloseOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons"
+import { Radio, Col, Row, Select, Card, Space, Typography, List, Modal, Popconfirm, message, Input, InputNumber, Button, Divider } from 'antd';
+import { CloseOutlined, MinusOutlined, PlusOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons"
 import React, { useEffect, useState } from 'react';
 import './styles.scss'
 import { connect_string } from '../../Api';
@@ -71,9 +71,21 @@ const CardItem = ({ src, title, data }) => {
         navigate("/tables-order")
     };
 
-    const handleCancel = () => {
+    const handleCancel = (value) => {
         setIsModalOpen(false);
     };
+
+    const handleSave = (value) => {
+        const url = connect_string + "update-order"
+        axios.post(url, value).then(res => {
+            message.success("Cập nhật thành công")
+            getOrderDetail()
+        }).catch(() => {
+            message.error("Cập nhật thất bại")
+
+        })
+    };
+
 
     const confirm = (e) => {
         const url = connect_string + "create-order"
@@ -102,14 +114,20 @@ const CardItem = ({ src, title, data }) => {
         }
 
     }
+
+    const handleResetData = (value) => {
+        if (value === true) {
+            getOrderDetail()
+        }
+    }
     return (
         <>
             {
                 data.data.table_status === 0 ?
                     (
                         <Popconfirm
-                            title={"THÊM ORDER: " + data.data.table_name}
-                            description="Bạn có chắc chắn muốn thêm order?"
+                            title={"Thêm order"}
+                            description={"Bạn có chắc chắn muốn thêm order " + data.data.table_name + "?"}
                             onConfirm={confirm}
                             okText="Yes"
                             cancelText="No"
@@ -180,16 +198,76 @@ const CardItem = ({ src, title, data }) => {
                         </Card.Meta>
                     </Card>
             }
-            <ModalTableOrderDetail open={isModalOpen} onOk={handleOk} onCancel={handleCancel} tableName={data.data.table_name} listOrderDetail={listOrderDetail} />
+            <ModalTableOrderDetail onSave={handleSave} dataTable={data} open={isModalOpen} onOk={handleOk} onCancel={handleCancel} tableName={data.data.table_name} listOrderDetail={listOrderDetail} resetData={handleResetData} />
         </>
     )
 }
 
-const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetail }) => {
+const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetail, resetData, dataTable, onSave }) => {
+    const navigate = useNavigate()
+    const userData = JSON.parse(sessionStorage.getItem('user_data'))
     const [quantityDict, setQuantityDict] = useState({});
     const [note, setNote] = useState('')
     const [orderList, setOrderList] = useState([])
+    const [total, setTotal] = useState(0)
+    const [totalInView, setTotalInView] = useState(0)
+    const [totalInViewTemp, setTotalInViewTemp] = useState(0)
+    const [surcharge, setSurcharge] = useState(0)
+    const [discount, setDiscount] = useState(0)
+    const [selectSurcharge, setSelectSurcharge] = useState('money')
+    const [selectDiscount, setSelectDiscount] = useState('money')
 
+    const handleChangeSurcharge = (value) => {
+        setSurcharge(value);
+        if (selectSurcharge === 'money') {
+            setTotalInView((prevTotal) => {
+                return prevTotal + value - surcharge;
+            });
+            // setTotalInViewTemp((prevTotal) => {
+            //     return prevTotal + value - surcharge;
+            // });
+        }
+        else {
+            setTotalInView((prevTotal) => {
+                return Number(prevTotal) - Number((Number(totalInViewTemp) * surcharge) / 100) + Number((Number(value) * totalInViewTemp) / 100);
+            });
+            // setTotalInViewTemp((prevTotal) => {
+            //     return Number(prevTotal) + Number(percentageChange) - Number(percentageChange1);
+            // });
+        }
+
+    }
+
+
+    const handleChangeDiscount = (value) => {
+        setDiscount(value)
+        if (selectDiscount === 'money') {
+            setTotalInView((prevTotal) => {
+
+                return Number(prevTotal) + Number(discount) - Number(value);
+            });
+            // setTotalInViewTemp((prevTotal) => {
+            //     return Number(prevTotal) + Number(discount) - Number(value);
+            // });
+        }
+        else {
+            setTotalInView((prevTotal) => {
+                return Number(prevTotal) + Number((Number(totalInViewTemp) * discount) / 100) - Number((Number(value) * totalInViewTemp) / 100);
+            });
+            // setTotalInViewTemp((prevTotal) => {
+            //     return Number(prevTotal) + Number(percentageChange) - Number(percentageChange1);
+            // });
+        }
+
+    }
+
+    const handleChangeSelectSurcharge = (event) => {
+        setSelectSurcharge(event.target.value)
+    }
+
+    const handleChangeSelectDiscount = (event) => {
+        setSelectDiscount(event.target.value)
+    }
 
     const handleChangeNote = (event) => {
         setNote(event.target.value)
@@ -198,7 +276,7 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
     const increaseQuantity = (itemId) => {
         setQuantityDict((prevDict) => {
             const newQuantity = (prevDict[itemId] || 0) + 1;
-    
+
             setOrderList((prevList) =>
                 prevList?.map((product) =>
                     product.id === itemId
@@ -206,7 +284,7 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                         : product
                 )
             );
-    
+
             return {
                 ...prevDict,
                 [itemId]: newQuantity,
@@ -217,7 +295,7 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
     const decreaseQuantity = (itemId) => {
         setQuantityDict((prevDict) => {
             const newQuantity = Math.max((prevDict[itemId] || 0) - 1, 1);
-    
+
             setOrderList((prevList) =>
                 prevList?.map((product) =>
                     product.id === itemId
@@ -225,13 +303,56 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                         : product
                 )
             );
-    
+
             return {
                 ...prevDict,
                 [itemId]: newQuantity,
             };
         });
     };
+
+    const handleEditMeal = (itemId) => {
+        setOrderList((prevList) =>
+            prevList?.map((product) =>
+                product.id === itemId
+                    ? { ...product, disable: false }
+                    : product
+            )
+        );
+    }
+
+    const handleCofirmEditMeal = (itemId) => {
+        setOrderList((prevList) => {
+            const updatedList = prevList?.map((product) =>
+                product.id === itemId
+                    ? { ...product, disable: true }
+                    : product
+            );
+
+            const editedItem = updatedList.find((product) => product.id === itemId);
+
+            if (editedItem) {
+                const url = connect_string + 'update-meal';
+                const dataEdit = {
+                    detail_id: editedItem.id,
+                    unit_price: editedItem.unit_price,
+                    quantity: editedItem.quantity,
+                    product_status: editedItem.product_status,
+                    user_id: userData.id
+                }
+                axios.post(url, dataEdit)
+                    .then((response) => {
+                        message.success('Cập nhật thành công');
+                        resetData(true)
+                    })
+                    .catch((error) => {
+                        message.error('Lỗi khi cập nhật');
+                    });
+            }
+
+            return updatedList;
+        });
+    }
 
     const initializeQuantityDict = () => {
         const initialQuantities = {};
@@ -241,44 +362,137 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
         setQuantityDict(initialQuantities);
     };
 
-    const onChangeQuantity = (value, item) => {
-        setOrderList((prevList) =>
-            prevList?.map((product) => {
-                return product.id === item.id
-                    ? { ...product, quantity: value, unit_price: value * Number(product.unit_price) }
-                    : product;
-            })
-        );
-       
-    };
 
     useEffect(() => {
         initializeQuantityDict();
-        setNote(listOrderDetail?.note)
-        setOrderList(listOrderDetail?.data)
+        setNote(listOrderDetail?.order?.note)
+        const arr = listOrderDetail?.data?.map((item) => ({
+            ...item,
+            disable: true
+        }))
+        setOrderList(arr)
+        setTotal(listOrderDetail?.order?.total_price)
+        setTotalInViewTemp(listOrderDetail?.order?.total_price)
+        setDiscount(listOrderDetail?.order?.discount)
+        setSurcharge(listOrderDetail?.order?.surcharge)
     }, [listOrderDetail.data]);
 
+    useEffect(() => {
+        if (orderList?.length > 0) {
+            const percentageChangeSurcharge = (Number(totalInViewTemp) * surcharge) / 100;
+            const percentageChangeDiscount = (Number(totalInViewTemp) * discount) / 100;
 
+            const totalPrice = orderList?.reduce((total, item) => total + Number(item.price), 0);
+
+            if (selectDiscount === 'money' && selectSurcharge === 'percent') {
+                setTotalInView(Number(totalPrice) - Number(discount) + Number(percentageChangeSurcharge))
+                setTotalInViewTemp(Number(totalPrice) - Number(discount) + Number(percentageChangeSurcharge))
+            }
+            else if (selectDiscount === 'percent' && selectSurcharge === 'money') {
+                setTotalInView(Number(totalPrice) - Number(percentageChangeDiscount) + Number(surcharge))
+                setTotalInViewTemp(Number(totalPrice) - Number(percentageChangeDiscount) + Number(surcharge))
+            }
+            else if (selectDiscount === 'money' && selectSurcharge === 'money') {
+                setTotalInView(Number(totalPrice) - Number(discount) + Number(surcharge))
+                setTotalInViewTemp(Number(totalPrice) - Number(discount) + Number(surcharge))
+            }
+            else if (selectDiscount === 'percent' && selectSurcharge === 'percent') {
+                setTotalInView(Number(totalPrice) - Number(percentageChangeDiscount) + Number(percentageChangeSurcharge))
+                setTotalInViewTemp(Number(totalPrice) - Number(percentageChangeDiscount) + Number(percentageChangeSurcharge))
+            }
+            // setTotalInView(Number(totalPrice))
+            // setTotalInViewTemp(Number(totalPrice))
+
+        }
+    }, [orderList])
+
+    // useEffect(() => {
+    //     if (selectSurcharge === 'percent') {
+    //         const percentageChange = (Number(totalInViewTemp) * surcharge) / 100;
+    //         console.log(percentageChange)
+    //         setTotalInView(
+    //             Number(totalInViewTemp) + Number(percentageChange)
+    //         )
+
+
+    //     }
+    // }, [surcharge]);
+
+    // useEffect(() => {
+    //     if (selectDiscount === 'percent') {
+    //         const percentageChange = (Number(totalInViewTemp) * discount) / 100;
+    //         console.log(percentageChange)
+
+    //         setTotalInView(
+    //             Number(totalInViewTemp) - Number(percentageChange)
+    //         )
+
+    //         // setTotalInViewTemp(Number(totalInViewTemp) - Number(percentageChange));
+
+    //     }
+    // }, [discount]);
+
+    const handleDelete = (id) => {
+        const url = connect_string + "delete-meal"
+        const data = {
+            id: id
+        }
+        axios.post(url, data).then(res => {
+            message.success("Xóa thành công")
+            resetData(true)
+
+        }).catch(() => {
+            message.error("Xóa thất bại")
+        })
+    }
+
+    const handleAddMeal = () => {
+        navigate("/products-order", { state: dataTable })
+    }
+
+    const handleEditOrder = () => {
+        const data = {
+            table_id: dataTable.id,
+            surcharge: selectSurcharge === "percent" ? (Number(totalInViewTemp) * surcharge) / 100 : surcharge,
+            discount: selectDiscount === "percent" ? (Number(totalInViewTemp) * discount) / 100 : discount,
+            user_id: userData.id,
+            note: note
+        }
+        return data
+    }
     return (
-        <Modal title={tableName} open={open} onOk={() => console.log(orderList)} onCancel={onCancel}>
+        <Modal
+            title={tableName}
+            open={open}
+            onOk={() => console.log(orderList)}
+            onCancel={onCancel}
+            okText="Thanh toán"
+            footer={(_, { OkBtn, CancelBtn }) => (
+                <>
+                    <Button onClick={() => onSave(handleEditOrder())}>Lưu</Button>
+                    {/* <CancelBtn /> */}
+                    <OkBtn />
+                </>
+            )}
+        >
             <Button
-                style={{ background: '#e07926', float: 'inline-end' }}
+                style={{ background: '#e07926', float: 'inline-end', zIndex: 999 }}
                 type="primary"
                 icon={<PlusOutlined />}
-            //onClick={() => addToOrders(item, quantityDict[item.id] || 1)}
+                onClick={handleAddMeal}
             >
                 Thêm
             </Button>
             <List
                 className="demo-loadmore-list"
                 itemLayout="horizontal"
-                dataSource={orderList|| []}
+                dataSource={orderList || []}
                 style={{ width: '100%' }}
                 renderItem={(item) => (
                     <List.Item key={item.id} style={{ width: '100%' }}>
                         <List.Item.Meta
                             title={
-                                <Typography.Text mark >{item.product_name}</Typography.Text>
+                                <Typography.Text  >{item.product_name}</Typography.Text>
                             }
                             description={
                                 <div style={{
@@ -287,7 +501,7 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                                     flexWrap: 'wrap',
                                     justifyContent: 'space-around',
                                     alignItems: 'center',
-                                    marginTop:'15px'
+                                    marginTop: '15px'
                                 }}>
                                     <div className='inputQuantity' style={{
                                         display: 'flex',
@@ -298,22 +512,27 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                                         padding: 1
                                     }}>
                                         <Button
+                                            disabled={item.disable}
                                             onClick={() => decreaseQuantity(item.id)}
                                             size='small'
                                             shape='circle'
                                             icon={<MinusOutlined />} />
                                         <Input
-                                            style={{ width: '50px', background: 'transparent', border: 'none', color: 'white !important' }}
+                                            style={{ width: '30px', background: 'transparent', border: 'none', color: 'white !important' }}
                                             value={quantityDict[item.id] || Number(item.quantity)}
                                             disabled
                                         />
                                         <Button
+                                            disabled={item.disable}
                                             onClick={() => increaseQuantity(item.id)}
                                             size='small'
                                             shape='circle'
                                             icon={<PlusOutlined />} />
+                                        <div >
+
+                                        </div>
                                     </div>
-                                    <Typography.Text mark>
+                                    <Typography.Text >
                                         {
                                             Number(item.price
                                             ).toLocaleString('vi-VN', {
@@ -323,7 +542,23 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
 
                                         }
                                     </Typography.Text>
-                                    <Button onClick={() => deleteItem(item)} size='small' type="primary" danger shape="circle" icon={<CloseOutlined />} />
+                                    {
+                                        item.disable === false
+                                            ?
+                                            <Button style={{ background: 'green' }} size='small' type="primary" shape="circle" icon={<CheckOutlined />} onClick={() => handleCofirmEditMeal(item.id)} />
+                                            :
+                                            <Button size='small' type="primary" shape="circle" icon={<EditOutlined />} onClick={() => handleEditMeal(item.id)} />
+                                    }
+                                    <Popconfirm
+                                        title={"Xóa món"}
+                                        description={"Bạn có chắc chắn muốn xóa món ?"}
+                                        onConfirm={() => handleDelete(item.id)}
+                                        okText="Yes"
+                                        cancelText="No"
+                                    >
+                                        <Button size='small' type="primary" danger shape="circle" icon={<CloseOutlined />} />
+                                    </Popconfirm>
+
                                     <Divider style={{ background: '#643006', marginTop: '10px', marginBottom: '10px' }} />
                                 </div>
                             }
@@ -331,7 +566,92 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                     </List.Item>
                 )}
             />
-            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} value={note} onChange={handleChangeNote} />
+
+            <Row gutter={[16, 16]} >
+                <Col span={6} style={{ alignItems: 'flex-end', display: 'flex', justifyContent: 'flex-end' }}>
+                    <Typography.Text style={{ fontWeight: 'bold', color: 'green' }}>Phụ thu </Typography.Text>
+                </Col>
+                <Col span={11}>
+                    <InputNumber value=
+                        {
+                            surcharge
+                            // selectSurcharge === 'money' ? Number(surcharge
+                            // ).toLocaleString('vi-VN', {
+                            //     style: 'currency',
+                            //     currency: 'VND',
+                            // }) : surcharge
+                        }
+                        min={0}
+                        parser={(value) => value.replace(/\./g, '')}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                        onChange={handleChangeSurcharge}
+                        style={{ border: 'none', borderBottom: '1px solid black', width: '100%', borderRadius: '0px' }} />
+                </Col>
+                <Col span={7}  style={{ alignItems: 'flex-end', display: 'flex', }}>
+                    <Radio.Group size='small' buttonStyle="solid" onChange={handleChangeSelectSurcharge} value={selectSurcharge}>
+                        <Radio.Button value="money">VND</Radio.Button>
+                        <Radio.Button value="percent">%</Radio.Button>
+                    </Radio.Group>
+                    {/* <Select
+                        style={{ width: '100%' }}
+                        options={[
+                            { value: 'money', label: 'VND' },
+                            { value: 'percent', label: '%' },
+                        ]}
+                    /> */}
+                </Col>
+                <Col span={6} style={{ alignItems: 'flex-end', display: 'flex', justifyContent: 'flex-end' }}>
+                    <Typography.Text style={{ fontWeight: 'bold', color: 'red' }}>Giảm giá </Typography.Text>
+                </Col>
+                <Col span={11}>
+                    <InputNumber value=
+                        {
+                            // selectDiscount === 'money' ? Number(discount
+                            // ).toLocaleString('vi-VN', {
+                            //     style: 'currency',
+                            //     currency: 'VND',
+                            // }) :
+                            discount
+                        }
+                        min={0}
+                        parser={(value) => value.replace(/\./g, '')}
+                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')}
+                        onChange={handleChangeDiscount}
+                        style={{ border: 'none', borderBottom: '1px solid black', width: '100%', borderRadius: '0px' }} />
+                </Col>
+                <Col span={7} style={{ alignItems: 'flex-end', display: 'flex', }}>
+                    <Radio.Group size='small' buttonStyle="solid" onChange={handleChangeSelectDiscount} value={selectDiscount}>
+                        <Radio.Button value="money">VND</Radio.Button>
+                        <Radio.Button value="percent">%</Radio.Button>
+                    </Radio.Group>
+                    {/* <Select
+                        value={selectDiscount}
+                        onChange={handleChangeSelectDiscount}
+                        style={{ width: '100%' }}
+                        options={[
+                            { value: 'money', label: 'VND' },
+                            { value: 'percent', label: '%' },
+                        ]}
+                    /> */}
+                </Col>
+                <Col span={6} style={{ alignItems: 'flex-end', display: 'flex', justifyContent: 'flex-end' }}>
+                    <Typography.Text style={{ fontWeight: 'bold', color: '#FE7A36' }}>Ghi chú </Typography.Text>
+                </Col>
+                <Col span={18}>
+                    <Input style={{ border: 'none', borderBottom: '1px solid black', borderRadius: '0px' }} value={note} onChange={handleChangeNote} />
+                </Col>
+                <Col span={24} style={{ alignItems: 'center', display: 'flex', justifyContent: 'flex-end' }}>
+                    <Typography.Text mark style={{ fontWeight: 'bold', }}>
+                        {
+                            "Tổng tiền: " +
+                            Number(totalInView).toLocaleString('vi-VN', {
+                                style: 'currency',
+                                currency: 'VND',
+                            })
+                        }
+                    </Typography.Text>
+                </Col>
+            </Row>
         </Modal>
     )
 }

@@ -344,7 +344,7 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
                                 <Typography.Text mark>{item.product_name}</Typography.Text>
                             }
                             description={
-                                <div style={{display:'flex', flexDirection:'row', flexWrap:'wrap', justifyContent:'space-around'}}>
+                                <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around' }}>
                                     <InputNumber
                                         style={{ width: '50px' }}
                                         value={item.quantity}
@@ -388,6 +388,7 @@ const ModalListOrder = ({ data, open, onOk, onCancel, total }) => {
                     </List.Item>
                 )}
             />
+
             <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} value={note} onChange={handleChangeNote} />
         </Modal>
     );
