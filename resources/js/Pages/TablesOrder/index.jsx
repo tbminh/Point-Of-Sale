@@ -187,37 +187,80 @@ const CardItem = ({ src, title, data }) => {
 
 const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetail }) => {
     const [quantityDict, setQuantityDict] = useState({});
+    const [note, setNote] = useState('')
+    const [orderList, setOrderList] = useState([])
+
+
+    const handleChangeNote = (event) => {
+        setNote(event.target.value)
+    }
+
     const increaseQuantity = (itemId) => {
-        setQuantityDict((prevDict) => ({
-            ...prevDict,
-            [itemId]: (prevDict[itemId] || 0) + 1,
-        }));
+        setQuantityDict((prevDict) => {
+            const newQuantity = (prevDict[itemId] || 0) + 1;
+    
+            setOrderList((prevList) =>
+                prevList?.map((product) =>
+                    product.id === itemId
+                        ? { ...product, quantity: newQuantity, price: newQuantity * Number(product.unit_price) }
+                        : product
+                )
+            );
+    
+            return {
+                ...prevDict,
+                [itemId]: newQuantity,
+            };
+        });
     };
 
     const decreaseQuantity = (itemId) => {
-        if (quantityDict[itemId] > 1) {
-            setQuantityDict((prevDict) => ({
+        setQuantityDict((prevDict) => {
+            const newQuantity = Math.max((prevDict[itemId] || 0) - 1, 1);
+    
+            setOrderList((prevList) =>
+                prevList?.map((product) =>
+                    product.id === itemId
+                        ? { ...product, quantity: newQuantity, price: newQuantity * Number(product.unit_price) }
+                        : product
+                )
+            );
+    
+            return {
                 ...prevDict,
-                [itemId]: prevDict[itemId] - 1,
-            }));
-        }
+                [itemId]: newQuantity,
+            };
+        });
     };
 
     const initializeQuantityDict = () => {
         const initialQuantities = {};
-        listOrderDetail.forEach((item) => {
+        listOrderDetail?.data?.forEach((item) => {
             initialQuantities[item.id] = Number(item.quantity) || 0;
         });
         setQuantityDict(initialQuantities);
     };
 
+    const onChangeQuantity = (value, item) => {
+        setOrderList((prevList) =>
+            prevList?.map((product) => {
+                return product.id === item.id
+                    ? { ...product, quantity: value, unit_price: value * Number(product.unit_price) }
+                    : product;
+            })
+        );
+       
+    };
+
     useEffect(() => {
         initializeQuantityDict();
-    }, [listOrderDetail]);
+        setNote(listOrderDetail?.note)
+        setOrderList(listOrderDetail?.data)
+    }, [listOrderDetail.data]);
 
 
     return (
-        <Modal title={tableName} open={open} onOk={onOk} onCancel={onCancel}>
+        <Modal title={tableName} open={open} onOk={() => console.log(orderList)} onCancel={onCancel}>
             <Button
                 style={{ background: '#e07926', float: 'inline-end' }}
                 type="primary"
@@ -229,13 +272,13 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
             <List
                 className="demo-loadmore-list"
                 itemLayout="horizontal"
-                dataSource={listOrderDetail || []}
+                dataSource={orderList|| []}
                 style={{ width: '100%' }}
                 renderItem={(item) => (
                     <List.Item key={item.id} style={{ width: '100%' }}>
                         <List.Item.Meta
                             title={
-                                <Typography.Text mark >{'item.product_name'}</Typography.Text>
+                                <Typography.Text mark >{item.product_name}</Typography.Text>
                             }
                             description={
                                 <div style={{
@@ -259,10 +302,9 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                                             size='small'
                                             shape='circle'
                                             icon={<MinusOutlined />} />
-                                        <InputNumber
+                                        <Input
                                             style={{ width: '50px', background: 'transparent', border: 'none', color: 'white !important' }}
                                             value={quantityDict[item.id] || Number(item.quantity)}
-                                            min={1}
                                             disabled
                                         />
                                         <Button
@@ -289,7 +331,7 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                     </List.Item>
                 )}
             />
-            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} />
+            <Input placeholder="Ghi chú" style={{ border: '1px solid black' }} value={note} onChange={handleChangeNote} />
         </Modal>
     )
 }
