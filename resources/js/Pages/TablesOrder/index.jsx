@@ -5,6 +5,7 @@ import './styles.scss'
 import { connect_string } from '../../Api';
 import axios from 'axios';
 import { useNavigate } from "react-router-dom"
+import { FaCheckDouble } from "react-icons/fa6";
 
 const TablesOrder = () => {
     const imgOrder = "../../../../images/dinner-table.png"
@@ -329,26 +330,26 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                     : product
             );
 
-            const editedItem = updatedList.find((product) => product.id === itemId);
+            // const editedItem = updatedList.find((product) => product.id === itemId);
 
-            if (editedItem) {
-                const url = connect_string + 'update-meal';
-                const dataEdit = {
-                    detail_id: editedItem.id,
-                    unit_price: editedItem.unit_price,
-                    quantity: editedItem.quantity,
-                    product_status: editedItem.product_status,
-                    user_id: userData.id
-                }
-                axios.post(url, dataEdit)
-                    .then((response) => {
-                        message.success('Cập nhật thành công');
-                        resetData(true)
-                    })
-                    .catch((error) => {
-                        message.error('Lỗi khi cập nhật');
-                    });
-            }
+            // if (editedItem) {
+            //     const url = connect_string + 'update-meal';
+            //     const dataEdit = {
+            //         detail_id: editedItem.id,
+            //         unit_price: editedItem.unit_price,
+            //         quantity: editedItem.quantity,
+            //         product_status: editedItem.product_status,
+            //         user_id: userData.id
+            //     }
+            //     axios.post(url, dataEdit)
+            //         .then((response) => {
+            //             message.success('Cập nhật thành công');
+            //             resetData(true)
+            //         })
+            //         .catch((error) => {
+            //             message.error('Lỗi khi cập nhật');
+            //         });
+            // }
 
             return updatedList;
         });
@@ -500,38 +501,80 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                                     flexDirection: 'row',
                                     flexWrap: 'wrap',
                                     justifyContent: 'space-around',
-                                    alignItems: 'center',
+                                    alignItems: 'flex-start',
                                     marginTop: '15px'
                                 }}>
-                                    <div className='inputQuantity' style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: 10,
-                                        background: 'rgb(61, 75, 100)',
-                                        borderRadius: '15px',
-                                        padding: 1
-                                    }}>
-                                        <Button
-                                            disabled={item.disable}
-                                            onClick={() => decreaseQuantity(item.id)}
-                                            size='small'
-                                            shape='circle'
-                                            icon={<MinusOutlined />} />
-                                        <Input
-                                            style={{ width: '30px', background: 'transparent', border: 'none', color: 'white !important' }}
-                                            value={quantityDict[item.id] || Number(item.quantity)}
-                                            disabled
-                                        />
-                                        <Button
-                                            disabled={item.disable}
-                                            onClick={() => increaseQuantity(item.id)}
-                                            size='small'
-                                            shape='circle'
-                                            icon={<PlusOutlined />} />
-                                        <div >
+                                    <div className='inputQuantity'
+                                    >
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 10,
+                                            background: 'rgb(61, 75, 100)',
+                                            borderRadius: '15px',
+                                            padding: 1,
+                                            position: 'relative'
+                                        }}>
+                                            <Button
+                                                disabled={item.disable}
+                                                onClick={() => decreaseQuantity(item.id)}
+                                                size='small'
+                                                shape='circle'
+                                                icon={<MinusOutlined />} />
+                                            <Input
+                                                style={{ width: '40px', background: 'transparent', border: 'none', color: 'white !important' }}
+                                                value={quantityDict[item.id] || Number(item.quantity)}
+                                                disabled
+                                            />
+                                            <Button
+                                                disabled={item.disable}
+                                                onClick={() => increaseQuantity(item.id)}
+                                                size='small'
+                                                shape='circle'
+                                                icon={<PlusOutlined />} />
+                                        </div>
+                                        <div style={{
+                                            marginTop: '10px',
+                                            display: item.disable === false ? "block" : "none",
+                                            opacity: 1,  // Set initial opacity to 1
+                                            transition: 'opacity 0.5s'  // Apply transition to the entire inner div
+                                        }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 10,
+                                                background: '#A94438',
+                                                borderRadius: '10px',
+                                                padding: 5,
+                                                position: 'relative',
+                                                flexDirection: 'column',
 
+                                            }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    gap: 5,
+                                                    alignItems: 'center',
+                                                }}>
+                                                    <Button
+                                                        onClick={() => decreaseQuantity(item.id)}
+                                                        size='small'
+                                                        shape='circle'
+                                                        icon={<MinusOutlined />} />
+                                                    <Input
+                                                        style={{ width: '40px' }}
+                                                        value={quantityDict[item.id] || Number(item.quantity)}
+                                                        disabled
+                                                    />
+                                                    <Button
+                                                        onClick={() => increaseQuantity(item.id)}
+                                                        size='small'
+                                                        shape='circle'
+                                                        icon={<PlusOutlined />} />
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+
                                     <Typography.Text >
                                         {
                                             Number(item.price
@@ -558,6 +601,11 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                                     >
                                         <Button size='small' type="primary" danger shape="circle" icon={<CloseOutlined />} />
                                     </Popconfirm>
+                                    <div >
+                                        <button style={{background:'green',borderRadius:'50%', minWidth:'24px', border:'none', color:'white'}}> 
+                                            <FaCheckDouble />
+                                        </button>
+                                    </div>
 
                                     <Divider style={{ background: '#643006', marginTop: '10px', marginBottom: '10px' }} />
                                 </div>
@@ -587,7 +635,7 @@ const ModalTableOrderDetail = ({ open, onOk, onCancel, tableName, listOrderDetai
                         onChange={handleChangeSurcharge}
                         style={{ border: 'none', borderBottom: '1px solid black', width: '100%', borderRadius: '0px' }} />
                 </Col>
-                <Col span={7}  style={{ alignItems: 'flex-end', display: 'flex', }}>
+                <Col span={7} style={{ alignItems: 'flex-end', display: 'flex', }}>
                     <Radio.Group size='small' buttonStyle="solid" onChange={handleChangeSelectSurcharge} value={selectSurcharge}>
                         <Radio.Button value="money">VND</Radio.Button>
                         <Radio.Button value="percent">%</Radio.Button>
