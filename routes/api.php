@@ -57,11 +57,10 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/update-order',[OrderController::class,'update_order']);
     Route::post('/add-meal',[OrderController::class,'add_meal']);
     Route::post('/update-meal',[OrderController::class,'update_meal']);
+    Route::post('/update-qty-done',[OrderController::class,'update_qty_done']);
     Route::post('/checkout',[OrderController::class,'checkout']);
     Route::post('/delete-meal',[OrderController::class,'delete_meal']);
     Route::post('/delete-table-order',[OrderController::class,'delete_table_order']);
-
-    
     #endregion
 });
 Route::post('notify',[OrderController::class,'notify']);

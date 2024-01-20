@@ -31,8 +31,11 @@ class Order implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PresenceChannel('notify'),
+            new Channel('notify'),
         ];
+    }
+    public function broadcastAs(){
+        return 'concat';
     }
     public function broadcastWith(){
         return $this->message;

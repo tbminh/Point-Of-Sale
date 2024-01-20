@@ -98,7 +98,6 @@ class OrderController extends Controller
     public function add_meal(Request $request)
     {
         $tableId = $request->input('table_id');
-        $note = $request->input('note');
         $user_id = $request->input('user_id');
         $dataOrder = $request->input('data_order');
         $orderId = Order::where('table_id', $tableId)->max('id');
@@ -110,35 +109,44 @@ class OrderController extends Controller
             $totalPrice = $item['total_price'];
 
             //Check exists order detail
-            $detail = OrderDetail::where('product_id', $id)
-                    ->where('order_id', $orderId)
-                    ->first();
-            if ($detail == null) {
+            // $detail = OrderDetail::where('product_id', $id)
+            //         ->where('order_id', $orderId)
+            //         ->first();
+            // if ($detail == null) {
                 $order_detail = OrderDetail::create([
                     'order_id' => $orderId,
                     'product_id' => $id,
                     'unit_price' => $productPrice,
                     'quantity' => $quantity,
+                    'quantity_done' => 0,
                     'price' => $totalPrice,
                     'product_status' => 0,
                     'user_id' => $user_id
                 ]);
                 Table::where('id',$tableId)->update(['table_status'=>1]);
-            } 
-            else {
-                $get_detail = OrderDetail::where('id', $detail->id)->first();
-                $order_detail = OrderDetail::where('id', $detail->id)->update([
-                    'unit_price' => $productPrice,
-                    'quantity' => $get_detail->quantity + $quantity,
-                    'price' => $get_detail->price +  $totalPrice,
-                    'product_status' => 0,
-                    'user_id' => $user_id,
-                ]);
-            }
+                $data = ['table_id' => $tableId];
+                broadcast(new \App\Events\Order($data));
+            // } 
+            // else {
+            //     $get_detail = OrderDetail::where('id', $detail->id)->first();
+            //     $order_detail = OrderDetail::where('id', $detail->id)->update([
+            //         'unit_price' => $productPrice,
+            //         'quantity' => $get_detail->quantity + $quantity,
+            //         'price' => $get_detail->price +  $totalPrice,
+            //         'product_status' => 0,
+            //         'user_id' => $user_id,
+            //     ]);
+            // }
         }
         //Update total_price of OrderDetail
         $this->updateTotalPrice($orderId);
-        return response()->json($order_detail, 200);
+        return response()->json($data, 200);
+    }
+    public function update_qty_done(Request $request){
+        $order_detail = OrderDetail::where('id', $request->detail_id)->update([
+            'quantity_done' => $request->quantity_done,
+        ]);
+        return response()->json(['message'=> $order_detail], 200);
     }
     public function update_meal(Request $request)
     {
