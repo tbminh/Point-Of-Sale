@@ -20,7 +20,7 @@ class Order implements ShouldBroadcast
     public $message;
     public function __construct($message)
     {
-        $this->message = $message;        
+        $this->message = $message;      
     }
 
     /**
