@@ -30,7 +30,7 @@ class UserController extends Controller
     {
         $credentials = $request->only('user_name', 'password');
         $token = Auth::attempt($credentials);
-
+        
         if (!$token) {
             return response()->json([
                 'message' => 'Unauthorized',

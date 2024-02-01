@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\Order;
+use App\Models\Order;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Table;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -184,5 +187,26 @@ class AdminController extends Controller
         return response()->json(['message' => 'Success'], 200);
     }
     #endregion
-    
+    public function get_order(Request $request){
+        $startDateTime = Carbon::parse($request->start_date)->startOfDay();
+        $endDateTime = Carbon::parse($request->end_date)->endOfDay();
+        $get_order = Order::leftjoin('tables as T', 'orders.table_id', '=', 'T.id')
+                    ->join('users as U', 'orders.user_id', '=', 'U.id')
+                    ->select('orders.*','T.table_name','U.user_name')
+                    ->whereBetween('date_order', [$request->start_date, $request->end_date])
+                    ->get();
+        return response()->json($get_order);
+    }
+    public function get_detail_admin($order_id){
+        $order = Order::where('id', $order_id)
+              ->select('id', DB::raw('COALESCE(note, "") as note'),'total_price','surcharge','discount')
+              ->orderBy('id', 'desc')
+              ->first();
+        $data = OrderDetail::join('products as P', 'order_details.product_id', '=', 'P.id')
+                        ->select('order_details.*', 'P.product_name',)
+                        ->where('order_id', $order_id)
+                        ->where('product_status','<>',2)
+                        ->get();
+        return response()->json($data);
+    }
 }

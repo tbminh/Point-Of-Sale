@@ -32,6 +32,8 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/update-user/{id}',[AdminController::class,'update_user']);
     Route::post('/update-password',[AdminController::class,'update_password']);
     Route::post('/delete-user/{id}',[AdminController::class,'delete_user']);
+    Route::post('/get-order',[AdminController::class,'get_order']);
+    Route::get('/get-detail-admin/{id}',[AdminController::class,'get_detail_admin']);
     Route::post('/logout', [UserController::class, 'logout']);
     #endregion
 
@@ -53,6 +55,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/get-table-order',[OrderController::class,'get_table_order']);
     Route::post('/get-product-order',[OrderController::class,'get_product_order']);
     Route::get('/get-order-detail/{table_id}',[OrderController::class,'get_order_detail']);
+    Route::get('/check-table/{table_id}',[OrderController::class,'check_table']);
     Route::post('/create-order',[OrderController::class,'create_order']);
     Route::post('/update-order',[OrderController::class,'update_order']);
     Route::post('/add-meal',[OrderController::class,'add_meal']);
@@ -61,6 +64,13 @@ Route::controller(UserController::class)->group(function () {
     Route::post('/checkout',[OrderController::class,'checkout']);
     Route::post('/delete-meal',[OrderController::class,'delete_meal']);
     Route::post('/delete-table-order',[OrderController::class,'delete_table_order']);
+    //Take away
+    Route::get('/get-order-take-away',[OrderController::class,'get_order_take_away']);
+    Route::get('/get-take-away-detail/{order_id}',[OrderController::class,'get_take_away_detail']);
+    Route::post('/create-take-away',[OrderController::class,'create_take_away']);
+    Route::post('/update-take-away',[OrderController::class,'update_take_away']);
+    Route::post('/add-meal-take-away',[OrderController::class,'add_meal_take_away']);
+    Route::post('/check-out-take-away',[OrderController::class,'checkout_take_away']);
+    Route::post('/cancel-take-away',[OrderController::class,'cancel_take_away']);
     #endregion
 });
-Route::post('notify',[OrderController::class,'notify']);

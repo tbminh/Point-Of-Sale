@@ -26,6 +26,7 @@ class OrderController extends Controller
     {
         $order = Order::where('table_id', $table_id)
               ->select('id', DB::raw('COALESCE(note, "") as note'),'total_price','surcharge','discount')
+              ->where('order_status','waiting')
               ->orderBy('id', 'desc')
               ->first();
         $data = OrderDetail::join('products as P', 'order_details.product_id', '=', 'P.id')
@@ -55,6 +56,10 @@ class OrderController extends Controller
         $data = $query->get();
         return response()->json($data);
     }
+    public function check_table($table_id){
+        $status = Table::select('table_status')->where('id',$table_id)->first();
+        return response()->json($status);
+    }
     public function create_order(Request $request)
     {
         $table = Table::where('id', $request->table_id)->first();
@@ -64,6 +69,7 @@ class OrderController extends Controller
             ]);
             Order::create([
                 'table_id' => $request->table_id,
+                'take_away' => 0,
                 'total_price' => 0,
                 'surcharge' => 0,
                 'discount' => 0,
@@ -82,7 +88,7 @@ class OrderController extends Controller
             'surcharge' => $request->surcharge,
             'discount' => $request->discount,
             'user_id' => $request->user_id,
-            'note' => $request->note,
+            'note' =>  $request->note != '' ? $request->note : '',
             'modify_time' => Carbon::now('Asia/Ho_Chi_Minh'),
         ]);
         $this->updateTotalPrice($orderId);
@@ -125,7 +131,7 @@ class OrderController extends Controller
             'table_id' => $tableId,
             'table_name' => $table_name
         ];
-        broadcast(new \App\Events\Order($data));
+        // broadcast(new \App\Events\Order($data));
         //Update total_price of OrderDetail
         $this->updateTotalPrice($orderId);
         return response()->json($data, 200);
@@ -177,12 +183,12 @@ class OrderController extends Controller
         Table::where('id',$request->table_id)->update([
             'table_status' => 0
         ]);
-        $this->updateTotalPrice($orderId);
+        // $this->updateTotalPrice($orderId);
         return response()->json(['message'=>'success'],200);
     }
     public function checkout(Request $request){
         Table::where('id',$request->table_id)->update(['table_status' => 0]);
-        $orderId = Order::where('table_id', $request->table_id)->max('id');
+        $orderId = Order::where('table_id',$request->table_id)->max('id');
         Order::where('id',$orderId)->update([
             'user_id' => $request->user_id,
             'order_status' => 'completed',
@@ -190,12 +196,135 @@ class OrderController extends Controller
         ]);
         return response()->json(['message'=>'Thanh toán thành công'],200);
     }
-
-    public function notify(Request $request)
+    #region Take Away
+    public function get_order_take_away(){
+        $order = Order::join('users', 'orders.user_id', '=', 'users.id')
+                ->where('orders.order_status', 'waiting')
+                ->where('orders.take_away', '<>', 0)
+                ->select('orders.*', 'users.user_name')
+                ->get();
+        return response()->json($order);
+    }
+    public function get_take_away_detail($order_id){
+        $order = Order::where('id', $order_id)
+                ->where('order_status','waiting')
+              ->select('id', DB::raw('COALESCE(note, "") as note'),'total_price','surcharge','discount')
+              ->orderBy('id', 'desc')
+              ->first();
+        $data = OrderDetail::join('products as P', 'order_details.product_id', '=', 'P.id')
+                        ->select('order_details.*', 'P.product_name')
+                        ->where('order_id', $order->id)
+                        ->where('product_status','<>',2)
+                        ->get();
+        $response = [
+            'data'=>$data,
+            'order'=>$order,
+        ];
+        return response()->json($response);
+    }
+    public function create_take_away(Request $request){
+        $get_take_way = Order::max('take_away') + 1;
+        Order::create([
+            'table_id' => 0,
+            'take_away' => $get_take_way,
+            'total_price' => 0,
+            'surcharge' => 0,
+            'discount' => 0,
+            'user_id' => $request->input('user_id'),
+            'order_status' => 'waiting',
+            'note' => '',
+            'modify_time' => Carbon::now('Asia/Ho_Chi_Minh'),
+            'date_order' => Carbon::now('Asia/Ho_Chi_Minh'),
+        ]);
+        $orderId = Order::select('id')->where('take_away',$get_take_way)->first();
+        $dataOrder = $request->input('data_order');
+        foreach ($dataOrder as $item) {
+            $id = $item['id'];
+            $productPrice = $item['unit_price'];
+            $quantity = $item['quantity'];
+            $totalPrice = $item['total_price'];
+            $order_detail = OrderDetail::create([
+                'order_id' => $orderId->id,
+                'product_id' => $id,
+                'unit_price' => $productPrice,
+                'quantity' => $quantity,
+                'quantity_done' => 0,
+                'price' => $totalPrice,
+                'product_status' => 0,
+                'user_id' => $request->input('user_id')
+            ]);
+        }
+        $this->updateTotalPrice($orderId->id);
+        $tableId = Order::where('id', $orderId->id)->get();
+        $data = [
+            'take_away' => true,
+            'table_id' => $tableId,
+            'table_name' => 'Khách ngoài'
+        ];
+        return response()->json($data, 200);
+    }
+    public function add_meal_take_away(Request $request)
     {
-        $message = $request->input('message');
-        $data = ['message' => $message];
-        broadcast(new \App\Events\Order($data));
-        return $request->message;
-    }    
+        $user_id = $request->input('user_id');
+        $orderId = $request->input('order_id');
+
+        $dataOrder = $request->input('data_order');
+        foreach ($dataOrder as $item) {
+            $id = $item['id'];
+            $productPrice = $item['unit_price'];
+            $quantity = $item['quantity'];
+            $totalPrice = $item['total_price'];
+            $order_detail = OrderDetail::create([
+                'order_id' => $orderId,
+                'product_id' => $id,
+                'unit_price' => $productPrice,
+                'quantity' => $quantity,
+                'quantity_done' => 0,
+                'price' => $totalPrice,
+                'product_status' => 0,
+                'user_id' => $user_id
+            ]);
+        }
+        //Update total_price of OrderDetail
+        $this->updateTotalPrice($orderId);
+        $tableId = Order::where('id', $orderId)->get();
+        $data = [
+            'take_away' => true,
+            'table_id' => $tableId,
+            'table_name' => 'Khách ngoài'
+        ];
+        return response()->json($data, 200);
+    }
+    public function update_take_away(Request $request){
+        $order = Order::where('id',$request->order_id)->update([
+            'surcharge' => $request->surcharge,
+            'discount' => $request->discount,
+            'user_id' => $request->user_id,
+            'note' =>  $request->note != '' ? $request->note : '',
+            'modify_time' => Carbon::now('Asia/Ho_Chi_Minh'),
+        ]);
+        $this->updateTotalPrice($request->order_id);
+        return response()->json($order,200);
+    }
+    public function checkout_take_away(Request $request){
+        $orderId = Order::where('id',$request->order_id)->first();
+        if ($orderId->order_status != "waiting"){
+            return response()->json(['message'=>'Hóa đơn đã thanh toán'],400);
+        }
+        Order::where('id',$orderId->id)->update([
+            'user_id' => $request->user_id,
+            'order_status' => 'completed',
+            'modify_time'=> Carbon::now('Asia/Ho_Chi_Minh')
+        ]);
+        return response()->json(['message'=>'Thanh toán thành công'],200);
+    }
+    public function cancel_take_away(Request $request){
+        $order = Order::where('id',$request->order_id)->update([
+            'order_status'=>'cancel',
+            'user_id'=>$request->user_id
+        ]);
+        return response()->json(['message'=>'Success'],200);
+    }
+    #endregion
+  
 }
